@@ -1,6 +1,5 @@
 import { useEffect, useState, type SubmitEvent } from 'react'
 import { Loader2, ShieldCheck } from 'lucide-react'
-import { useNavigate } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { FormAlert, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
@@ -13,8 +12,7 @@ const CODE_PATTERN = /^\d{6}$/
 
 export function VerifyPhonePage() {
   const user = useCurrentUser()
-  const { verifyPhone } = useAuth()
-  const navigate = useNavigate()
+  const { verifyPhone, logout } = useAuth()
 
   const [code, setCode] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -42,7 +40,6 @@ export function VerifyPhonePage() {
     setError(null)
     try {
       await verifyPhone(code)
-      void navigate('/', { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {
@@ -124,6 +121,13 @@ export function VerifyPhonePage() {
                 </Button>
               </div>
             </form>
+
+            <p className="mt-6 border-t pt-4 text-center text-sm text-muted-foreground">
+              Wrong account?{' '}
+              <Button type="button" variant="link" className="h-auto p-0" onClick={() => void logout()}>
+                Log out
+              </Button>
+            </p>
           </CardContent>
         </Card>
       </main>

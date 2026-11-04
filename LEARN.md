@@ -19,9 +19,11 @@ Auth theory refresher: `~/JS-concepts/api-data-integration/src/auth/AUTH.md`.
 | 10 | Signup + role toggle (DRIVER / RIDER) | ✅ |
 | 11 | Verify phone (6-digit code + resend countdown) | ✅ |
 | 12 | Silent refresh on 401 (axios interceptor, one refresh at a time) | ✅ |
-| 13 | Logout + profile (`PATCH /me`) | ⏳ next |
+| 13 | Logout + profile (`PATCH /me`) | ✅ |
+| 14 | Dashboard layout like bear-portal-new (sidebar + page sections) | ✅ |
+| 15 | Admin: list users (TanStack Query, pagination, filters): see [LEARN-admin-users.md](LEARN-admin-users.md) | ✅ |
 
-Later (after auth): React Hook Form + Zod, TanStack Query, MSW mock backend for tests, then the car-pooling features (rides, bookings…).
+Later: React Hook Form + Zod, MSW mock backend for tests, the other admin lists (rides, audit logs, vehicles), then the car-pooling features (rides, bookings…). TanStack Query was added in step 15.
 
 ---
 
@@ -886,7 +888,7 @@ Protected pages call `const user = useCurrentUser()`: always a `User`, never `nu
 ### Files (in build order)
 | # | File | Job |
 |---|------|-----|
-| 1 | `services/api/ApiError.ts`, `axiosClient.ts` | Understand 400 `details` → `ApiError.fieldErrors` + a readable `message` |
+| 1 | `services/api/ApiError.ts`, `axiosClient.ts` | Understand 400 `details` → a readable `message` ("Phone: …") |
 | 2 | `features/auth/types.ts`, `lib/validation.ts` | `SIGNUP_ROLES` (`as const`), `SignupValues`, `validateSignup()`. The email rule is shared with login (`emailError()`) |
 | 3 | `api/authApi.ts`, `useAuth.ts`, `AuthProvider.tsx` | `signup()`: API call, then status `authenticated` (signup sets the same cookies as login) |
 | 4 | `components/SignupForm.tsx` | 5 fields + RIDER/DRIVER radio cards |
@@ -932,7 +934,7 @@ export type SignupRole = (typeof SIGNUP_ROLES)[number]    // 'RIDER' | 'DRIVER'
 | **Our** check (empty, short password, wrong phone…) | Under the field |
 | **Anything the server says** (409 email taken, 429, a 400 our check missed…) | One red box at the top, with the server's message |
 Thanks to action 1, even a 400 has a readable message, e.g. *"Phone: enter a valid 10-digit Indian mobile number"*.
-(We first built a version that also put server errors under each field. It was more code than it was worth, so we removed it. `ApiError.fieldErrors` still exists if we ever need it.)
+(We first built a version that also put server errors under each field. It was more code than it was worth, so we removed it. Later we also removed `ApiError.fieldErrors`, since nothing used it.)
 
 **6. Signup = logged in**
 The server sets the cookies on 201, so the provider sets `authenticated` → `GuestRoute` → `/`. **No navigation code in the page.** The new user has `phoneVerified: false` → step 11.
@@ -945,7 +947,7 @@ The server sets the cookies on 201, so the provider sets `authenticated` → `Gu
 3. Phone `5876543210` → "Enter a 10-digit mobile number…". Password `1234567` → too short.
 4. Click the role cards, then use **Tab** + **arrow keys**: the highlight follows.
 5. Sign up with an email you've already used → the server's **409** message in the red box.
-6. A real signup (⚠️ 5 per hour) → you land on `/` with "Phone not verified yet". You should receive an SMS code, keep it for step 11!
+6. A real signup (⚠️ 5 per hour) → after step 11 you land on `/verify-phone`. You should receive an SMS code, keep it for step 11!
 
 ### Check yourself
 1. Why check in the browser if the server checks anyway? (Two reasons.)
@@ -1003,8 +1005,8 @@ if (auth.user.phoneVerified && onVerifyPage) return <Navigate to="/" replace />
 - `auth.user` needs no `?.`: after the `status` checks, the discriminated union tells TS the user exists.
 - Every future protected page (`/rides`, `/profile`…) is covered automatically.
 
-**5. `void navigate(...)`**
-In React Router 8, `navigate()` returns a Promise. `void` says "I'm not waiting for it on purpose" (it keeps linters happy). After a successful verify, the guard would redirect home anyway; `navigate('/')` just makes the intent clear.
+**5. No `navigate()` after verifying**
+After a successful verify, the provider saves the user with `phoneVerified: true`, and the guard's second rule sends you to `/`. So the page doesn't navigate itself (the same "change the state, the routes follow" idea as signup and logout). An unverified user can still leave with the **Log out** link under the card.
 
 ### Flow at a glance
 ```
@@ -1118,3 +1120,149 @@ If the refresh fails **while you use the app**, that request shows an error, but
 2. What would happen without the `_retried` flag if the server kept answering 401?
 3. Three requests get 401 at the same time. How many refreshes are sent, and why does it matter for this backend?
 4. Why does `.finally()` set `refreshing` back to `null`?
+
+---
+
+## Step 13: logout, session ended, profile
+
+**Goal:** finish auth. Log out from a menu, notice when the session dies mid-use, and let the user change their name.
+
+### Files
+| # | File | Job |
+|---|------|-----|
+| 1 | `authApi.ts`, `useAuth.ts`, `AuthProvider.tsx` | `logout()` → `POST /logout`. `updateName(name)` → `PATCH /me` |
+| 2 | `services/api/axiosClient.ts` | `setSessionExpiredHandler()`: called when the silent refresh fails |
+| 3 | `pages/ProfilePage.tsx` + `/profile` route | Change your name; email, phone and role are read-only |
+
+### The concepts
+
+**1. Change the state, the routes follow**
+`logout` only does `setState({ status: 'unauthenticated' })`. `ProtectedRoute` sees it and redirects to `/login`. There's no `navigate()` call, the same as signup and verify.
+```ts
+await logoutRequest().catch(() => undefined)   // even offline: the user asked to leave
+setState({ status: 'unauthenticated', user: null })
+```
+
+**2. A callback lets non-React code talk to React**
+`axiosClient.ts` knows *when* the refresh failed but can't call `setState`. The provider hands it a function:
+```tsx
+useEffect(() => {
+  setSessionExpiredHandler(() => setState({ status: 'unauthenticated', user: null }))
+  return () => setSessionExpiredHandler(null)   // cleanup: no calls after unmount
+}, [])
+```
+`onSessionExpired?.()` only calls it if it's set. bear-portal-new does a full-page `location.replace('/login')`; ours just changes state (no reload, and it remembers the page in `from`).
+
+**3. A form that starts filled in**
+`useState(user.name)`: the initial value is used **only on the first render**. Then the input belongs to the form.
+
+**4. Derived values instead of extra state**
+```ts
+const trimmed = name.trim()
+const nameError = trimmed ? undefined : 'Name is required'
+const hasChanged = trimmed !== user.name   // Save is disabled until true
+```
+
+**5. One save updates every screen.** `updateName` stores the returned user in the provider, so the sidebar, the menu and the Dashboard show the new name at once.
+
+### Try it
+1. Profile → change your name → **Save changes** → the sidebar name updates.
+2. Clear the name → "Name is required", and Save is disabled.
+3. Delete **both** cookies in DevTools (don't reload), then click Save → `/login`. Log in → back on `/profile`.
+4. Sidebar user menu → **Log out** → `/login`, and both cookies are gone.
+
+### Check yourself
+1. Why does logout not need `navigate('/login')`?
+2. Why can't `axiosClient.ts` call `setState` itself, and how does it tell the app?
+3. If `user.name` changes elsewhere, does `useState(user.name)` update the input? Why not?
+
+---
+
+## Step 14: dashboard layout (like bear-portal-new)
+
+**Goal:** the same structure as the portal: a collapsible sidebar, a top bar, and pages made of a header plus bordered sections. Auth pages (login, signup, verify) keep their centered card.
+
+### Files
+| File | Job |
+|------|-----|
+| `components/ui/sidebar.tsx` (+ sheet, tooltip, separator, skeleton, avatar, switch) | Added with `npx shadcn@latest add sidebar avatar switch` |
+| `hooks/use-mobile.ts` | "Is the screen narrower than 768px?", rewritten with `useSyncExternalStore` |
+| `layouts/DashboardLayout.tsx` | `DashboardLayout`, `AppSidebar` (nav), `NavUser` (footer menu) |
+| `components/page.tsx` | `PageHeader`, `SectionCard`, `DetailRow`, `StatusBadge` |
+| `routes/AppRoutes.tsx` | Home + Profile nested inside `DashboardLayout` |
+| `main.tsx` | `<TooltipProvider>` (tooltips on the collapsed sidebar icons) |
+
+### The concepts
+
+**1. A nested layout route**
+```tsx
+<Route element={<ProtectedRoute />}>          {/* 1. logged in? */}
+  <Route path="/verify-phone" element={<VerifyPhonePage />} />
+  <Route element={<DashboardLayout />}>       {/* 2. sidebar + top bar */}
+    <Route path="/" element={<HomePage />} />  {/* 3. the page, in <Outlet /> */}
+    <Route path="/profile" element={<ProfilePage />} />
+  </Route>
+</Route>
+```
+A route with only `element` (no `path`) wraps its children. Each layer renders an `<Outlet />` where the next one goes. The pages no longer draw a header themselves.
+
+**2. Navigation from a config array**
+`NAV_ITEMS = [{ to, label, Icon }]` → `.map()` → one `SidebarMenuButton` each. To add "Find a ride" later: one new line. `isActive={pathname === to}` gives the dark highlight.
+
+**3. `asChild` (Radix Slot)**
+`<SidebarMenuButton asChild><Link to="/">…</Link></SidebarMenuButton>`: the button's styles and behaviour go onto **its child**, so the result is a real `<a>` link that looks like a menu button.
+
+**4. `useSidebar()`: a context from shadcn**
+`SidebarProvider` holds "open / collapsed / mobile". Any component inside can read it: the menu opens to the **right** when the sidebar is collapsed and **upward** otherwise, and on phones a nav click closes the slide-in panel. This is the same pattern as our `useAuth` and `useTheme`.
+
+**5. `useSyncExternalStore`: reading something outside React**
+```ts
+useSyncExternalStore(
+  subscribe,                                       // how to listen for changes
+  () => window.matchMedia(MOBILE_QUERY).matches,   // the current value
+  () => false,                                     // value during server render
+)
+```
+shadcn's version copied the value into state inside an effect (lint warns: an extra render). This hook is React's built-in way to read browser values like screen size or online status.
+
+**6. Small layout components with `children`**
+`<SectionCard title Icon aside>…</SectionCard>`: the frame (border, grey header row, icon tile) is written once, and each page fills in the inside. `Icon` is passed as a **component** (`Icon={IdCard}`) and rendered as `<Icon />`.
+
+### Compared with bear-portal-new
+Same building blocks: `SidebarProvider`, `Sidebar collapsible="icon"`, `SidebarTrigger`, a footer `DropdownMenu` with initials, a theme `Switch` and Logout. Theirs adds collapsible nav sections, permissions per item, an organization switcher, notifications and a route loader.
+
+### Try it
+1. Log in → the Dashboard with the sidebar.
+2. Click ◫ (top left), or press **⌘B**: the sidebar collapses to icons. Hover an icon to see a tooltip.
+3. Click your name (bottom left) → My Profile, the theme switch and Log out.
+4. Make the window narrow (< 768px): the sidebar becomes a slide-in panel opened by ◫.
+
+### Check yourself
+1. Which component renders the `<Outlet />` that HomePage appears in?
+2. Why does the verify-phone page sit outside `DashboardLayout` but inside `ProtectedRoute`?
+3. What does `asChild` change about the rendered HTML?
+4. Why is `useSyncExternalStore` better than `useState` + `useEffect` for screen size?
+
+## Step 15: color for badges and icons (from bear-portal-new)
+
+The app looked black and white because our theme is shadcn's default grey: `--primary` in `src/index.css` has no hue at all. bear-portal-new sets it to a pine green, and adds colored badges.
+
+**1. Badges with a `tone` prop**
+`<StatusBadge tone="green">` picks its colors from a small map (`TONES` in `src/components/page.tsx`). The colors are copied from bear-portal-new's Badge: a light background, darker text, and a `dark:` version for dark mode. No tone means `neutral`, the old grey look.
+
+**2. One color per role**
+`<RoleBadge role="DRIVER" />` looks up `ROLE_TONES` (ADMIN purple, DRIVER blue, RIDER green), so the Dashboard and the Users table always agree. `Record<Role, …>` makes TypeScript complain if a new role is added without a color.
+
+**3. Verified as a badge**
+The Users table shows green ✓ Verified or amber 🕒 Pending. bear-portal-new colors Active/Pending the same way (green / amber).
+
+**4. Tinted icon tiles**
+`SectionCard`'s icon box uses `bg-primary/10 text-primary`: the primary color at 10% opacity behind, the full color on the icon. It reads from the theme, so it turns properly colored once `--primary` gets a real color.
+
+**5. A project skill: `.claude/skills/shadcn/SKILL.md`**
+A skill is a set of instructions Claude loads for a kind of task. This one, adapted from bear-portal-new, tells Claude to build UI with shadcn components and theme colors (`bg-primary`, not `bg-blue-500`), `gap-*` instead of `space-y-*`, `size-*` for square things, and accessible dialogs. Because it lives in the repo, it applies to anyone working on this project.
+
+### Check yourself
+1. Why put the role → color map in one place instead of writing colors in each page?
+2. What does the `/10` in `bg-primary/10` mean?
+3. Why will the icon tiles change color by themselves when we pick a brand color?

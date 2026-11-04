@@ -1,7 +1,9 @@
-import { Loader2 } from 'lucide-react'
-import { Navigate, Outlet, useLocation } from 'react-router'
+import { Loader2, ShieldX } from 'lucide-react'
+import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
-import { useAuth } from '@/features/auth/useAuth'
+import { PageHeader } from '@/components/page'
+import { Button } from '@/components/ui/button'
+import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 
 // Pages for logged-in users only. Logged out → /login, remembering where they wanted to go.
 // Unverified phone → /verify-phone first; already verified → no need to stay on /verify-phone.
@@ -16,6 +18,28 @@ export function ProtectedRoute() {
   if (!auth.user.phoneVerified && !onVerifyPage) return <Navigate to="/verify-phone" replace />
   if (auth.user.phoneVerified && onVerifyPage) return <Navigate to="/" replace />
   return <Outlet />
+}
+
+// Admin pages. Sits inside ProtectedRoute + DashboardLayout, so the user exists and the sidebar stays.
+// The server checks the role too (403); this only avoids showing a page that can't work.
+export function AdminRoute() {
+  const user = useCurrentUser()
+  if (!user.roles.includes('ADMIN')) return <NoAccess />
+  return <Outlet />
+}
+
+function NoAccess() {
+  return (
+    <>
+      <PageHeader title="No access" description="This page is only for admins." />
+      <div className="flex flex-col items-start gap-4 p-6">
+        <ShieldX className="size-10 text-muted-foreground" aria-hidden />
+        <Button asChild variant="outline">
+          <Link to="/">Back to Dashboard</Link>
+        </Button>
+      </div>
+    </>
+  )
 }
 
 // Pages for logged-out users only (login, signup). Logged in → back to where they wanted to go.

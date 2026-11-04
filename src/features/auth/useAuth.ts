@@ -12,6 +12,7 @@ export type AuthContextValue = AuthState & {
   login: (values: LoginValues) => Promise<User>
   signup: (values: SignupValues) => Promise<User>
   verifyPhone: (code: string) => Promise<User>
+  updateName: (name: string) => Promise<User>
   logout: () => Promise<void>
 }
 

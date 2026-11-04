@@ -2,7 +2,7 @@
 
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { env } from '@/config/env'
-import { ApiError, NETWORK_ERROR_MESSAGE, type ApiOptions, type ErrorBody, type FieldErrors } from './ApiError'
+import { ApiError, NETWORK_ERROR_MESSAGE, type ApiOptions, type ErrorBody } from './ApiError'
 
 // ① An INSTANCE: settings shared by every request made through `http`.
 //    (bear-portal-new does the same in baseApiService.ts.)
@@ -39,11 +39,20 @@ http.interceptors.response.use(
     try {
       await refreshSession()
     } catch {
+      onSessionExpired?.()
       throw toApiError(error)
     }
     return http.request(error.config)
   },
 )
+
+// This file isn't React, so it can't change the auth state itself.
+// The AuthProvider registers a function here, and we call it when the session is over.
+let onSessionExpired: (() => void) | null = null
+
+export function setSessionExpiredHandler(handler: (() => void) | null) {
+  onSessionExpired = handler
+}
 
 // A 401 here can't be fixed by refreshing: a wrong password, or the refresh itself failing.
 const NO_REFRESH_URLS = new Set(['/api/auth/login', '/api/auth/signup', '/api/auth/refresh', '/api/auth/logout'])
@@ -85,25 +94,17 @@ function toApiError(error: unknown): unknown {
   // an object if the server sent JSON, or a plain string (e.g. a proxy's 502).
   const { status, data } = error.response
   const body: ErrorBody = typeof data === 'object' && data !== null ? data : {}
-  const fieldErrors = toFieldErrors(body.details)
   // Prefer the SERVER's own words: its message, else its per-field messages, else our fallback.
-  const message = body.message ?? (summarize(fieldErrors) || fallbackMessage(status))
-  return new ApiError(status, body.error ?? 'HttpError', message, fieldErrors)
+  const message = body.message ?? (summarize(body.details) || fallbackMessage(status))
+  return new ApiError(status, body.error ?? 'HttpError', message)
 }
 
-// { phone: ['msg 1', 'msg 2'] } → { phone: 'msg 1' }: one message per field is enough on screen.
-function toFieldErrors(details: ErrorBody['details']): FieldErrors {
-  const result: FieldErrors = {}
-  for (const [field, messages] of Object.entries(details ?? {})) {
-    if (Array.isArray(messages) && typeof messages[0] === 'string') result[field] = messages[0]
-  }
-  return result
-}
-
-// { phone: 'enter a valid…', name: 'name is required' } → "Phone: enter a valid…. Name: name is required"
-function summarize(fieldErrors: FieldErrors): string {
-  return Object.entries(fieldErrors)
-    .map(([field, message]) => `${field.charAt(0).toUpperCase()}${field.slice(1)}: ${message}`)
+// { phone: ['enter a valid…', 'msg 2'], name: ['name is required'] }
+//   → "Phone: enter a valid…. Name: name is required" (the first message per field is enough)
+function summarize(details: ErrorBody['details']): string {
+  return Object.entries(details ?? {})
+    .filter(([, messages]) => Array.isArray(messages) && typeof messages[0] === 'string')
+    .map(([field, messages]) => `${field.charAt(0).toUpperCase()}${field.slice(1)}: ${messages[0]}`)
     .join('. ')
 }
 
@@ -114,10 +115,10 @@ function fallbackMessage(status: number): string {
 }
 
 // The function the whole app calls: api<{ user: User }>('/api/auth/me')
-export async function api<T>(path: string, { method = 'GET', body, signal }: ApiOptions = {}): Promise<T> {
+export async function api<T>(path: string, { method = 'GET', body, params, signal }: ApiOptions = {}): Promise<T> {
   // ④ `data` = the body. axios turns the object into JSON AND sets
   //    Content-Type: application/json for us. The reply is already parsed: response.data.
-  const response = await http.request<T>({ url: path, method, data: body, signal })
+  const response = await http.request<T>({ url: path, method, data: body, params, signal })
   // 204 No Content: axios gives back an empty string; we normalize it to undefined.
   return response.status === 204 ? (undefined as T) : response.data
 }
