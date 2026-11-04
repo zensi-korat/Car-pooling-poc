@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hasFilters, readUserFilters } from '../userFilters'
+import { hasFilters, readRideFilters, readUserFilters } from '../filters'
 
 const read = (query: string) => readUserFilters(new URLSearchParams(query))
 
@@ -38,9 +38,46 @@ describe('readUserFilters', () => {
   })
 })
 
+describe('readRideFilters', () => {
+  const readRides = (query: string) => readRideFilters(new URLSearchParams(query))
+
+  it('reads valid filters', () => {
+    expect(readRides('q=pune&status=SCHEDULED&departureFrom=2026-11-01&departureTo=2026-11-30')).toEqual({
+      q: 'pune',
+      status: 'SCHEDULED',
+      departureFrom: '2026-11-01',
+      departureTo: '2026-11-30',
+    })
+  })
+
+  it('ignores an unknown status and malformed dates', () => {
+    expect(readRides('status=scheduled&departureFrom=tomorrow')).toMatchObject({
+      status: undefined,
+      departureFrom: undefined,
+    })
+  })
+
+  it('drops "to" when it is before "from"', () => {
+    expect(readRides('departureFrom=2026-11-30&departureTo=2026-11-01')).toMatchObject({
+      departureFrom: '2026-11-30',
+      departureTo: undefined,
+    })
+  })
+
+  it('does not read the users filters', () => {
+    expect(readRides('role=DRIVER&joinedFrom=2026-10-01')).toEqual({
+      q: undefined,
+      status: undefined,
+      departureFrom: undefined,
+      departureTo: undefined,
+    })
+  })
+})
+
 describe('hasFilters', () => {
   it('false when nothing is set, true when anything is', () => {
     expect(hasFilters({})).toBe(false)
     expect(hasFilters({ role: 'RIDER' })).toBe(true)
+    expect(hasFilters({ status: 'CANCELLED' })).toBe(true)
   })
 })

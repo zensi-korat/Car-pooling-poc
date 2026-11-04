@@ -4,7 +4,6 @@ import { RoleBadge, StatusBadge } from '@/components/page'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { User } from '@/features/auth/types'
-import { cn } from '@/lib/utils'
 
 const HEADINGS = ['Name', 'Email', 'Phone', 'Role', 'Verified', 'Joined']
 const SKELETON_ROWS = 5
@@ -24,13 +23,13 @@ type UsersTableProps = Readonly<{
 
 export function UsersTable({ users, isUpdating, footer }: UsersTableProps) {
   let rows: ReactNode
-  if (!users) rows = <SkeletonRows />
+  if (!users || isUpdating) rows = <SkeletonRows />
   else if (users.length === 0) rows = <MessageRow>No users found.</MessageRow>
   else rows = users.map((user) => <UserRow key={user.id} user={user} />)
 
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
-      <Table aria-busy={isUpdating} className={cn('transition-opacity', isUpdating && 'opacity-60')}>
+      <Table aria-busy={isUpdating}>
         <TableHeader className="bg-muted/50">
           <TableRow>
             {HEADINGS.map((heading) => (

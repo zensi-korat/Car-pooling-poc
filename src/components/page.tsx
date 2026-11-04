@@ -64,7 +64,9 @@ const TONES = {
   red: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
-type StatusBadgeProps = Readonly<{ tone?: keyof typeof TONES; children: ReactNode }>
+export type Tone = keyof typeof TONES
+
+type StatusBadgeProps = Readonly<{ tone?: Tone; children: ReactNode }>
 
 export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps) {
   return (
@@ -76,7 +78,7 @@ export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps) {
   )
 }
 
-const ROLE_TONES: Record<Role, keyof typeof TONES> = {
+const ROLE_TONES: Record<Role, Tone> = {
   ADMIN: 'purple',
   DRIVER: 'blue',
   RIDER: 'green',
@@ -85,7 +87,6 @@ const ROLE_TONES: Record<Role, keyof typeof TONES> = {
 export function RoleBadge({ role }: Readonly<{ role: Role }>) {
   return <StatusBadge tone={ROLE_TONES[role]}>{role}</StatusBadge>
 }
-
 
 type TablePaginationProps = Readonly<{
   page: number
@@ -114,7 +115,7 @@ export function TablePagination({
       className="flex flex-wrap items-center justify-between gap-4 border-t px-4 py-3 text-sm text-muted-foreground"
     >
       <p aria-live="polite">
-        Showing {from}–{to} of {total}
+        Showing {from}-{to} of {total}
       </p>
 
       <div className="flex flex-wrap items-center gap-4">
@@ -141,12 +142,7 @@ export function TablePagination({
         </span>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(page - 1)}
-            disabled={disabled || page <= 1}
-          >
+          <Button variant="outline" size="sm" onClick={() => onPageChange(page - 1)} disabled={disabled || page <= 1}>
             <ChevronLeft data-icon="inline-start" />
             Previous
           </Button>

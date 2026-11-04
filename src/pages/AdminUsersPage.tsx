@@ -4,7 +4,7 @@ import { PageHeader, TablePagination } from '@/components/page'
 import { UsersFilters } from '@/features/admin/components/UsersFilters'
 import { UsersTable } from '@/features/admin/components/UsersTable'
 import { useAdminUsers } from '@/features/admin/hooks/useAdminUsers'
-import { hasFilters, readUserFilters } from '@/features/admin/lib/userFilters'
+import { hasFilters, readUserFilters } from '@/features/admin/lib/filters'
 import type { UserFilters } from '@/features/admin/types'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { DEFAULT_PAGE_SIZE, readPage, readPageSize } from '@/lib/pagination'
@@ -40,11 +40,11 @@ export function AdminUsersPage() {
 
   return (
     <>
-      <PageHeader title="Users" description={description} />
+      <PageHeader title="Users" description={description}>
+        <UsersFilters filters={filters} onChange={handleFiltersChange} />
+      </PageHeader>
 
       <div className="flex flex-col gap-4 p-6">
-        <UsersFilters filters={filters} onChange={handleFiltersChange} />
-
         {isError ? (
           <FormAlert>{error.message}</FormAlert>
         ) : (

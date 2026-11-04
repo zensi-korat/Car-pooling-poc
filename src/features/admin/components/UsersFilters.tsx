@@ -1,9 +1,10 @@
 import { Search, X } from 'lucide-react'
+import { DateRangeFilter } from '@/components/DateRangeFilter'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { hasFilters, ROLES } from '../lib/userFilters'
+import { hasFilters, ROLES } from '../lib/filters'
 import type { UserFilters } from '../types'
 
 const ALL_ROLES = 'ALL'
@@ -16,6 +17,15 @@ type UsersFiltersProps = Readonly<{
 export function UsersFilters({ filters, onChange }: UsersFiltersProps) {
   return (
     <div className="flex flex-wrap items-end gap-3">
+      {hasFilters(filters) && (
+        <Button
+          variant="outline"
+          onClick={() => onChange({ q: undefined, role: undefined, joinedFrom: undefined, joinedTo: undefined })}
+        >
+          <X data-icon="inline-start" />
+          Clear filters
+        </Button>
+      )}
       <div className="flex min-w-60 flex-1 flex-col gap-1.5">
         <Label htmlFor="users-search">Search</Label>
         <div className="relative">
@@ -55,38 +65,15 @@ export function UsersFilters({ filters, onChange }: UsersFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="users-joined-from">Joined from</Label>
-        <Input
-          id="users-joined-from"
-          type="date"
-          max={filters.joinedTo}
-          value={filters.joinedFrom ?? ''}
-          onChange={(e) => onChange({ joinedFrom: e.target.value })}
-          className="w-40"
+        <Label htmlFor="users-joined">Joined</Label>
+        <DateRangeFilter
+          id="users-joined"
+          placeholder="Any date"
+          disableFutureDates
+          value={{ from: filters.joinedFrom, to: filters.joinedTo }}
+          onChange={({ from, to }) => onChange({ joinedFrom: from, joinedTo: to })}
         />
       </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="users-joined-to">Joined to</Label>
-        <Input
-          id="users-joined-to"
-          type="date"
-          min={filters.joinedFrom}
-          value={filters.joinedTo ?? ''}
-          onChange={(e) => onChange({ joinedTo: e.target.value })}
-          className="w-40"
-        />
-      </div>
-
-      {hasFilters(filters) && (
-        <Button
-          variant="ghost"
-          onClick={() => onChange({ q: undefined, role: undefined, joinedFrom: undefined, joinedTo: undefined })}
-        >
-          <X data-icon="inline-start" />
-          Clear filters
-        </Button>
-      )}
     </div>
   )
 }

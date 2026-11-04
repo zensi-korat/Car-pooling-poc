@@ -38,12 +38,6 @@ export function LoginPage() {
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
               <LoginForm onSubmit={handleLogin} isSubmitting={isSubmitting} serverError={error} />
-
-              {isSubmitting && (
-                <p className="text-center text-xs text-muted-foreground">
-                  The first login can take up to a minute while the server wakes up.
-                </p>
-              )}
             </CardContent>
           </Card>
 

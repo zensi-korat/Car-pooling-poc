@@ -1,4 +1,4 @@
-import { CarFront, ChevronsUpDown, LayoutDashboard, LogOut, Moon, Sun, UserRound, Users } from 'lucide-react'
+import { Car, CarFront, ChevronsUpDown, LayoutDashboard, LogOut, Moon, Sun, UserRound, Users } from 'lucide-react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -34,6 +34,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/profile', label: 'My Profile', Icon: UserRound },
   { to: '/admin/users', label: 'Users', Icon: Users, adminOnly: true },
+  { to: '/admin/rides', label: 'Rides', Icon: Car, adminOnly: true },
 ]
 
 export function DashboardLayout() {
