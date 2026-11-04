@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../ApiError'
-import { api, http } from '../axiosClient'
+import { api, http, setSessionExpiredHandler } from '../axiosClient'
 
 // No backend needed: we replace the global fetch with a fake that returns
 // whatever Response we want, then check what api() did with it.
@@ -58,6 +58,13 @@ describe('api()', () => {
     expect(req.headers.get('X-Requested-With')).toBe('XMLHttpRequest')
   })
 
+  it('params → query string, and undefined values are left out', async () => {
+    const fake = mockFetch(json(200, {}))
+    await api('/api/admin/users', { params: { page: 2, pageSize: 50, role: 'RIDER', q: undefined } })
+
+    expect(sentRequest(fake).url).toBe('http://localhost:5173/api/admin/users?page=2&pageSize=50&role=RIDER')
+  })
+
   it("keeps the SERVER's error and message in the ApiError", async () => {
     mockFetch(json(401, { error: 'UnauthenticatedError', message: 'Invalid email or password' }))
 
@@ -66,7 +73,7 @@ describe('api()', () => {
     expect(err).toMatchObject({ status: 401, code: 'UnauthenticatedError', message: 'Invalid email or password' })
   })
 
-  it('400 with "details" (no message) → per-field errors + a readable summary', async () => {
+  it('400 with "details" (no message) → a readable summary, first message per field', async () => {
     // The real reply from POST /api/auth/signup with invalid name + phone.
     mockFetch(
       json(400, {
@@ -83,13 +90,7 @@ describe('api()', () => {
       status: 400,
       code: 'ValidationError',
       message: 'Name: name is required. Phone: enter a valid 10-digit Indian mobile number',
-      fieldErrors: { name: 'name is required', phone: 'enter a valid 10-digit Indian mobile number' },
     })
-  })
-
-  it('errors without "details" have empty fieldErrors', async () => {
-    mockFetch(json(401, { error: 'UnauthenticatedError', message: 'Invalid email or password' }))
-    await expect(api('/api/auth/login', { method: 'POST', body: {} })).rejects.toMatchObject({ fieldErrors: {} })
   })
 
   it('no message from the server (e.g. a proxy 502 in plain text) → our fallback message', async () => {
@@ -187,5 +188,32 @@ describe('silent refresh on 401', () => {
 
     await Promise.all([api('/api/rides'), api('/api/bookings'), api('/api/auth/me')])
     expect(calls.filter((path) => path === '/api/auth/refresh')).toHaveLength(1)
+  })
+
+  it('the refresh fails → tells the app the session is over', async () => {
+    const onExpired = vi.fn()
+    setSessionExpiredHandler(onExpired)
+    mockServer(() => json(401, ME_401))
+
+    await api('/api/auth/me').catch(() => undefined)
+    expect(onExpired).toHaveBeenCalledTimes(1)
+    setSessionExpiredHandler(null)
+  })
+
+  it('the refresh works → the app is NOT told anything', async () => {
+    const onExpired = vi.fn()
+    setSessionExpiredHandler(onExpired)
+    let refreshed = false
+    mockServer((path) => {
+      if (path === '/api/auth/refresh') {
+        refreshed = true
+        return json(200, {})
+      }
+      return refreshed ? json(200, {}) : json(401, ME_401)
+    })
+
+    await api('/api/auth/me')
+    expect(onExpired).not.toHaveBeenCalled()
+    setSessionExpiredHandler(null)
   })
 })

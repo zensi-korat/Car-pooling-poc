@@ -26,7 +26,7 @@ export async function getMe(signal?: AbortSignal): Promise<User> {
 
 // POST /api/auth/signup → 201 { user }, and sets the same cookies as login,
 // so the new user is logged in straight away (with phoneVerified: false).
-// On failure: 400 ValidationError (fieldErrors), 409 email taken, 429 too many signups.
+// On failure: 400 ValidationError, 409 email taken, 429 too many signups.
 export async function signup(values: SignupValues): Promise<User> {
   const data = await api<UserResponse>('/api/auth/signup', { method: 'POST', body: values })
   return data.user
@@ -36,6 +36,13 @@ export async function signup(values: SignupValues): Promise<User> {
 // The cookie tells the server whose phone it is. 400 wrong code, 409 already verified, 429 too many tries.
 export async function verifyPhone(code: string): Promise<User> {
   const data = await api<UserResponse>('/api/auth/verify-phone', { method: 'POST', body: { code } })
+  return data.user
+}
+
+// PATCH /api/auth/me with { name } → the updated user. Only the name can change.
+// 400 blank name, 401 no session.
+export async function updateName(name: string): Promise<User> {
+  const data = await api<UserResponse>('/api/auth/me', { method: 'PATCH', body: { name } })
   return data.user
 }
 
