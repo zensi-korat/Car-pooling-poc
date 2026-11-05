@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { LoginValues, SignupValues, User } from './types'
+import type { LoginValues, SignupValues, User } from './api/authSchema'
 
 // "authenticated" always comes with a user; the other two never do.
 // After `if (auth.status === 'authenticated')`, TypeScript knows `auth.user` is a User.

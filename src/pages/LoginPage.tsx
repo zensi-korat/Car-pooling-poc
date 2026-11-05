@@ -4,7 +4,7 @@ import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
 import { LoginForm } from '@/features/auth/components/LoginForm'
-import type { LoginValues } from '@/features/auth/types'
+import type { LoginValues } from '@/features/auth/api/authSchema'
 import { useAuth } from '@/features/auth/useAuth'
 import { getErrorMessage } from '@/services/api'
 
@@ -38,12 +38,6 @@ export function LoginPage() {
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
               <LoginForm onSubmit={handleLogin} isSubmitting={isSubmitting} serverError={error} />
-
-              {isSubmitting && (
-                <p className="text-center text-xs text-muted-foreground">
-                  The first login can take up to a minute while the server wakes up.
-                </p>
-              )}
             </CardContent>
           </Card>
 

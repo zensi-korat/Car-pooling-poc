@@ -1,9 +1,11 @@
-import type { ComponentType, ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Fragment, type ComponentType, type ReactNode } from 'react'
+import { BadgeCheck, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { Role } from '@/features/auth/types'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import type { Role } from '@/features/auth/api/authSchema'
 import { PAGE_SIZES } from '@/lib/pagination'
 
 type PageHeaderProps = Readonly<{
@@ -64,7 +66,9 @@ const TONES = {
   red: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
-type StatusBadgeProps = Readonly<{ tone?: keyof typeof TONES; children: ReactNode }>
+export type Tone = keyof typeof TONES
+
+type StatusBadgeProps = Readonly<{ tone?: Tone; children: ReactNode }>
 
 export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps) {
   return (
@@ -76,7 +80,7 @@ export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps) {
   )
 }
 
-const ROLE_TONES: Record<Role, keyof typeof TONES> = {
+const ROLE_TONES: Record<Role, Tone> = {
   ADMIN: 'purple',
   DRIVER: 'blue',
   RIDER: 'green',
@@ -86,6 +90,90 @@ export function RoleBadge({ role }: Readonly<{ role: Role }>) {
   return <StatusBadge tone={ROLE_TONES[role]}>{role}</StatusBadge>
 }
 
+export function VerifiedBadge({ verified }: Readonly<{ verified: boolean }>) {
+  return verified ? (
+    <StatusBadge tone="green">
+      <BadgeCheck /> Verified
+    </StatusBadge>
+  ) : (
+    <StatusBadge tone="amber">
+      <Clock /> Not verified
+    </StatusBadge>
+  )
+}
+
+// A table cell with a bold first line and a small grey second line (name + email, make + plate…).
+export function TwoLines({ main, sub }: Readonly<{ main: ReactNode; sub: ReactNode }>) {
+  return (
+    <div className="flex flex-col">
+      <span className="font-medium">{main}</span>
+      <span className="text-xs text-muted-foreground">{sub}</span>
+    </div>
+  )
+}
+
+const SKELETON_ROWS = 5
+
+type ListTableProps<T> = Readonly<{
+  headings: readonly string[]
+  items: T[] | undefined
+  isUpdating?: boolean
+  emptyMessage: string
+  renderRow: (item: T) => ReactNode
+  footer?: ReactNode
+}>
+
+// The frame every admin list shares: headings, then skeleton rows while loading,
+// a message when empty, or one row per item. `renderRow` draws the item's <TableRow>.
+export function ListTable<T extends { id: string }>({
+  headings,
+  items,
+  isUpdating,
+  emptyMessage,
+  renderRow,
+  footer,
+}: ListTableProps<T>) {
+  let rows: ReactNode
+  if (!items || isUpdating) {
+    rows = Array.from({ length: SKELETON_ROWS }, (_, row) => (
+      <TableRow key={row}>
+        {headings.map((heading) => (
+          <TableCell key={heading} className="px-4 py-3">
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+        ))}
+      </TableRow>
+    ))
+  } else if (items.length === 0) {
+    rows = (
+      <TableRow>
+        <TableCell colSpan={headings.length} className="h-24 text-center text-muted-foreground">
+          {emptyMessage}
+        </TableCell>
+      </TableRow>
+    )
+  } else {
+    rows = items.map((item) => <Fragment key={item.id}>{renderRow(item)}</Fragment>)
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border bg-card">
+      <Table aria-busy={isUpdating}>
+        <TableHeader className="bg-muted/50">
+          <TableRow>
+            {headings.map((heading) => (
+              <TableHead key={heading} className="px-4">
+                {heading}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>{rows}</TableBody>
+      </Table>
+      {footer}
+    </div>
+  )
+}
 
 type TablePaginationProps = Readonly<{
   page: number
@@ -114,7 +202,7 @@ export function TablePagination({
       className="flex flex-wrap items-center justify-between gap-4 border-t px-4 py-3 text-sm text-muted-foreground"
     >
       <p aria-live="polite">
-        Showing {from}–{to} of {total}
+        Showing {from}-{to} of {total}
       </p>
 
       <div className="flex flex-wrap items-center gap-4">
@@ -141,12 +229,7 @@ export function TablePagination({
         </span>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(page - 1)}
-            disabled={disabled || page <= 1}
-          >
+          <Button variant="outline" size="sm" onClick={() => onPageChange(page - 1)} disabled={disabled || page <= 1}>
             <ChevronLeft data-icon="inline-start" />
             Previous
           </Button>

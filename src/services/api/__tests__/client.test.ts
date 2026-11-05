@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { ApiError } from '../ApiError'
+import { z } from 'zod'
+import { ApiError, INVALID_RESPONSE_MESSAGE } from '../ApiError'
 import { api, http, setSessionExpiredHandler } from '../axiosClient'
 
 // No backend needed: we replace the global fetch with a fake that returns
@@ -28,12 +29,32 @@ beforeAll(() => {
   http.defaults.adapter = 'fetch'
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
 
 describe('api()', () => {
   it('returns the parsed JSON on success', async () => {
     mockFetch(json(200, { user: { id: '1', name: 'Asha' } }))
     await expect(api('/api/auth/me')).resolves.toEqual({ user: { id: '1', name: 'Asha' } })
+  })
+
+  it('with a schema: returns the checked data', async () => {
+    mockFetch(json(200, { user: { id: '1', name: 'Asha' } }))
+    const schema = z.object({ user: z.object({ id: z.string() }) })
+    // Fields the schema doesn't list are dropped.
+    await expect(api('/api/auth/me', { schema })).resolves.toEqual({ user: { id: '1' } })
+  })
+
+  it('with a schema: a wrong shape becomes an ApiError with a friendly message', async () => {
+    mockFetch(json(200, { user: { id: 1 } }))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const schema = z.object({ user: z.object({ id: z.string() }) })
+    const error = await api('/api/auth/me', { schema }).catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({ code: 'InvalidResponseError', message: INVALID_RESPONSE_MESSAGE })
+    expect(console.error).toHaveBeenCalled()
   })
 
   it('GET: no X-Requested-With header, but cookies are included', async () => {

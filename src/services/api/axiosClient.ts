@@ -1,8 +1,9 @@
 // The app's HTTP client, built on axios. Every request goes through api().
 
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import { z } from 'zod'
 import { env } from '@/config/env'
-import { ApiError, NETWORK_ERROR_MESSAGE, type ApiOptions, type ErrorBody } from './ApiError'
+import { ApiError, INVALID_RESPONSE_MESSAGE, NETWORK_ERROR_MESSAGE, type ApiOptions, type ErrorBody } from './ApiError'
 
 // ① An INSTANCE: settings shared by every request made through `http`.
 //    (bear-portal-new does the same in baseApiService.ts.)
@@ -114,11 +115,26 @@ function fallbackMessage(status: number): string {
   return `Something went wrong (${status}). Please try again.`
 }
 
-// The function the whole app calls: api<{ user: User }>('/api/auth/me')
-export async function api<T>(path: string, { method = 'GET', body, params, signal }: ApiOptions = {}): Promise<T> {
+// The function the whole app calls:
+//   api('/api/auth/me', { schema: userResponseSchema })  → checked, typed from the schema
+//   api<{ ok: true }>('/api/x')                            → unchecked, typed by hand
+export async function api<T>(
+  path: string,
+  { method = 'GET', body, params, signal, schema }: ApiOptions<T> = {},
+): Promise<T> {
   // ④ `data` = the body. axios turns the object into JSON AND sets
   //    Content-Type: application/json for us. The reply is already parsed: response.data.
   const response = await http.request<T>({ url: path, method, data: body, params, signal })
   // 204 No Content: axios gives back an empty string; we normalize it to undefined.
-  return response.status === 204 ? (undefined as T) : response.data
+  const data = response.status === 204 ? undefined : response.data
+  return schema ? parseResponse(schema, data, response.status, path) : (data as T)
+}
+
+// A response that doesn't match its schema becomes an ApiError like any other failure,
+// so screens show one friendly sentence. The exact mismatch goes to the console for us.
+function parseResponse<T>(schema: z.ZodType<T>, data: unknown, status: number, path: string): T {
+  const result = schema.safeParse(data)
+  if (result.success) return result.data
+  console.error(`Unexpected response from ${path}:\n${z.prettifyError(result.error)}`)
+  throw new ApiError(status, 'InvalidResponseError', INVALID_RESPONSE_MESSAGE)
 }

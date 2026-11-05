@@ -2,7 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Loader2, ShieldCheck, UserRound } from 'lucide-react'
 import { FormAlert, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
-import { DetailRow, PageHeader, SectionCard, StatusBadge } from '@/components/page'
+import { DetailRow, PageHeader, SectionCard, StatusBadge, VerifiedBadge } from '@/components/page'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 import { getErrorMessage } from '@/services/api'
 
@@ -79,7 +79,12 @@ export function ProfilePage() {
         <SectionCard title="Account" Icon={ShieldCheck} aside={<StatusBadge>Can't be changed</StatusBadge>}>
           <dl className="divide-y">
             <DetailRow label="Email">{user.email}</DetailRow>
-            <DetailRow label="Phone">{user.phone}</DetailRow>
+            <DetailRow label="Phone">
+              <span className="flex items-center gap-2">
+                <span className="truncate">{user.phone}</span>
+                <VerifiedBadge verified={user.phoneVerified} />
+              </span>
+            </DetailRow>
             <DetailRow label="Role">{user.roles.join(', ')}</DetailRow>
           </dl>
         </SectionCard>
