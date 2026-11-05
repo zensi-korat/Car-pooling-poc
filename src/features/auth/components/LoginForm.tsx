@@ -3,7 +3,7 @@ import { Loader2, LogIn } from 'lucide-react'
 import { FormAlert, PasswordField, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { isValid, validateLogin } from '../lib/validation'
-import type { LoginValues } from '../types'
+import type { LoginValues } from '../api/authSchema'
 
 type LoginFormProps = {
   onSubmit: (values: LoginValues) => void

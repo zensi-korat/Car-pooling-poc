@@ -1,5 +1,5 @@
 import { IdCard } from 'lucide-react'
-import { DetailRow, PageHeader, RoleBadge, SectionCard } from '@/components/page'
+import { DetailRow, PageHeader, RoleBadge, SectionCard, VerifiedBadge } from '@/components/page'
 import { useCurrentUser } from '@/features/auth/useAuth'
 
 export function HomePage() {
@@ -15,7 +15,12 @@ export function HomePage() {
           <dl className="divide-y">
             <DetailRow label="Name">{user.name}</DetailRow>
             <DetailRow label="Email">{user.email}</DetailRow>
-            <DetailRow label="Phone">{user.phone}</DetailRow>
+            <DetailRow label="Phone">
+              <span className="flex items-center gap-2">
+                <span className="truncate">{user.phone}</span>
+                <VerifiedBadge verified={user.phoneVerified} />
+              </span>
+            </DetailRow>
             <DetailRow label="Role">
               <span className="flex flex-wrap gap-2">
                 {user.roles.map((role) => (

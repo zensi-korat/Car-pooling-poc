@@ -1,5 +1,6 @@
 import {
   Car,
+  ClipboardCheck,
   CarFront,
   ChevronsUpDown,
   History,
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
   { to: '/profile', label: 'My Profile', Icon: UserRound },
   { to: '/admin/users', label: 'Users', Icon: Users, adminOnly: true },
   { to: '/admin/rides', label: 'Rides', Icon: Car, adminOnly: true },
+  { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, adminOnly: true },
   { to: '/admin/audit-logs', label: 'Audit log', Icon: History, adminOnly: true },
 ]
 

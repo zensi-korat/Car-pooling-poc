@@ -9,7 +9,7 @@ import {
   verifyPhone as verifyPhoneRequest,
 } from './api/authApi'
 import { setSessionExpiredHandler } from '@/services/api'
-import type { LoginValues, SignupValues } from './types'
+import type { LoginValues, SignupValues } from './api/authSchema'
 import { AuthContext, type AuthState } from './useAuth'
 
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {

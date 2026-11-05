@@ -1,8 +1,9 @@
 import { Route, Routes } from 'react-router'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
-import { AdminAuditLogsPage } from '@/pages/AdminAuditLogsPage'
-import { AdminRidesPage } from '@/pages/AdminRidesPage'
-import { AdminUsersPage } from '@/pages/AdminUsersPage'
+import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage'
+import { AdminRidesPage } from '@/pages/admin/AdminRidesPage'
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
+import { AdminVehiclesPage } from '@/pages/admin/AdminVehiclesPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -24,6 +25,7 @@ export function AppRoutes() {
           <Route element={<AdminRoute />}>
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/rides" element={<AdminRidesPage />} />
+            <Route path="/admin/vehicles" element={<AdminVehiclesPage />} />
             <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
           </Route>
         </Route>

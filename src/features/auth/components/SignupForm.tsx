@@ -4,7 +4,7 @@ import { FormAlert, PasswordField, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { env } from '@/config/env'
 import { isValid, validateSignup } from '../lib/validation'
-import { SIGNUP_ROLES, type SignupRole, type SignupValues } from '../types'
+import { SIGNUP_ROLES, type SignupRole, type SignupValues } from '../api/authSchema'
 
 type SignupFormProps = {
   onSubmit: (values: SignupValues) => void

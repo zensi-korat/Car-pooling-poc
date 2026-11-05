@@ -1,5 +1,7 @@
 // The one error type every failed request turns into, so screens handle errors one way.
 
+import type { z } from 'zod'
+
 // The backend's error body, in one of two shapes:
 //   { "error": "UnauthenticatedError", "message": "Invalid email or password" }
 //   { "error": "ValidationError", "details": { "phone": ["enter a valid 10-digit…"] } }
@@ -22,12 +24,15 @@ export class ApiError extends Error {
 export type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 
 // The options every api() call accepts, whichever client is behind it.
-export type ApiOptions = {
+export type ApiOptions<T = unknown> = {
   method?: Method
   body?: unknown
   // Query string: { page: 2, role: 'RIDER' } → ?page=2&role=RIDER. undefined values are left out.
   params?: Record<string, string | number | undefined>
   signal?: AbortSignal
+  // Checks the response's shape. The result's type comes from the schema, so no api<T> needed.
+  schema?: z.ZodType<T>
 }
 
 export const NETWORK_ERROR_MESSAGE = "Can't reach the server. Check your connection and try again."
+export const INVALID_RESPONSE_MESSAGE = 'The server sent data in an unexpected format. Please try again later.'

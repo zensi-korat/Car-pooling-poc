@@ -4,7 +4,7 @@ import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
 import { LoginForm } from '@/features/auth/components/LoginForm'
-import type { LoginValues } from '@/features/auth/types'
+import type { LoginValues } from '@/features/auth/api/authSchema'
 import { useAuth } from '@/features/auth/useAuth'
 import { getErrorMessage } from '@/services/api'
 

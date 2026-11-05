@@ -1,11 +1,11 @@
 import { Fragment, type ComponentType, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { BadgeCheck, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { Role } from '@/features/auth/types'
+import type { Role } from '@/features/auth/api/authSchema'
 import { PAGE_SIZES } from '@/lib/pagination'
 
 type PageHeaderProps = Readonly<{
@@ -88,6 +88,28 @@ const ROLE_TONES: Record<Role, Tone> = {
 
 export function RoleBadge({ role }: Readonly<{ role: Role }>) {
   return <StatusBadge tone={ROLE_TONES[role]}>{role}</StatusBadge>
+}
+
+export function VerifiedBadge({ verified }: Readonly<{ verified: boolean }>) {
+  return verified ? (
+    <StatusBadge tone="green">
+      <BadgeCheck /> Verified
+    </StatusBadge>
+  ) : (
+    <StatusBadge tone="amber">
+      <Clock /> Not verified
+    </StatusBadge>
+  )
+}
+
+// A table cell with a bold first line and a small grey second line (name + email, make + plate…).
+export function TwoLines({ main, sub }: Readonly<{ main: ReactNode; sub: ReactNode }>) {
+  return (
+    <div className="flex flex-col">
+      <span className="font-medium">{main}</span>
+      <span className="text-xs text-muted-foreground">{sub}</span>
+    </div>
+  )
 }
 
 const SKELETON_ROWS = 5
