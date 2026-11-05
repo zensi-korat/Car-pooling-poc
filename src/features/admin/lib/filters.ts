@@ -2,10 +2,13 @@
 // so a hand-typed URL can't send the server a filter it would reject (400).
 
 import type { Role } from '@/features/auth/types'
-import type { RideFilters, RideStatus, UserFilters } from '../types'
+import type { AuditEntityType, AuditLogFilters, RideFilters, RideStatus, UserFilters } from '../types'
 
 export const ROLES: Role[] = ['DRIVER', 'RIDER', 'ADMIN']
 export const RIDE_STATUSES: RideStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED']
+export const AUDIT_ENTITY_TYPES: AuditEntityType[] = ['Ride', 'Booking', 'Vehicle']
+// Actions seen in Swagger's examples and real responses. The server has no full list yet (asked the backend).
+export const AUDIT_ACTIONS = ['CREATED', 'CANCELLED', 'COMPLETED', 'APPROVED']
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
@@ -19,6 +22,13 @@ export function readRideFilters(params: URLSearchParams): RideFilters {
   const [departureFrom, departureTo] = readDateRange(params.get('departureFrom'), params.get('departureTo'))
   const status = RIDE_STATUSES.find((s) => s === params.get('status'))
   return { q: readSearch(params), status, departureFrom, departureTo }
+}
+
+export function readAuditLogFilters(params: URLSearchParams): AuditLogFilters {
+  const [from, to] = readDateRange(params.get('from'), params.get('to'))
+  const entityType = AUDIT_ENTITY_TYPES.find((t) => t === params.get('entityType'))
+  const action = AUDIT_ACTIONS.find((a) => a === params.get('action'))
+  return { entityType, action, from, to }
 }
 
 export function hasFilters(filters: Record<string, unknown>): boolean {

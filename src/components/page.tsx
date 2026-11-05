@@ -1,8 +1,10 @@
-import type { ComponentType, ReactNode } from 'react'
+import { Fragment, type ComponentType, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Role } from '@/features/auth/types'
 import { PAGE_SIZES } from '@/lib/pagination'
 
@@ -86,6 +88,69 @@ const ROLE_TONES: Record<Role, Tone> = {
 
 export function RoleBadge({ role }: Readonly<{ role: Role }>) {
   return <StatusBadge tone={ROLE_TONES[role]}>{role}</StatusBadge>
+}
+
+const SKELETON_ROWS = 5
+
+type ListTableProps<T> = Readonly<{
+  headings: readonly string[]
+  items: T[] | undefined
+  isUpdating?: boolean
+  emptyMessage: string
+  renderRow: (item: T) => ReactNode
+  footer?: ReactNode
+}>
+
+// The frame every admin list shares: headings, then skeleton rows while loading,
+// a message when empty, or one row per item. `renderRow` draws the item's <TableRow>.
+export function ListTable<T extends { id: string }>({
+  headings,
+  items,
+  isUpdating,
+  emptyMessage,
+  renderRow,
+  footer,
+}: ListTableProps<T>) {
+  let rows: ReactNode
+  if (!items || isUpdating) {
+    rows = Array.from({ length: SKELETON_ROWS }, (_, row) => (
+      <TableRow key={row}>
+        {headings.map((heading) => (
+          <TableCell key={heading} className="px-4 py-3">
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+        ))}
+      </TableRow>
+    ))
+  } else if (items.length === 0) {
+    rows = (
+      <TableRow>
+        <TableCell colSpan={headings.length} className="h-24 text-center text-muted-foreground">
+          {emptyMessage}
+        </TableCell>
+      </TableRow>
+    )
+  } else {
+    rows = items.map((item) => <Fragment key={item.id}>{renderRow(item)}</Fragment>)
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border bg-card">
+      <Table aria-busy={isUpdating}>
+        <TableHeader className="bg-muted/50">
+          <TableRow>
+            {headings.map((heading) => (
+              <TableHead key={heading} className="px-4">
+                {heading}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>{rows}</TableBody>
+      </Table>
+      {footer}
+    </div>
+  )
 }
 
 type TablePaginationProps = Readonly<{

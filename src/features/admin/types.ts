@@ -67,3 +67,28 @@ export type ListRidesParams = {
 }
 
 export type RideFilters = Omit<ListRidesParams, 'page' | 'pageSize'>
+
+export type AuditEntityType = 'Ride' | 'Booking' | 'Vehicle'
+
+// One line of the audit trail, written by the server on every ride/booking/vehicle change.
+export type AuditLog = {
+  id: string
+  entityType: AuditEntityType
+  entityId: string // id of the ride/booking/vehicle that changed
+  action: string // e.g. "CANCELLED"; Swagger gives examples, not a full list
+  actorId: string // the user's id, or "system" for scheduled jobs
+  metadata: Record<string, unknown> | null // differs per action, e.g. { reason: "AUTO_COMPLETED" }
+  createdAt: string
+}
+
+// Query parameters of GET /api/admin/audit-logs. Same paging as users. No search.
+export type ListAuditLogsParams = {
+  page?: number
+  pageSize?: number
+  entityType?: AuditEntityType
+  action?: string // exact action name
+  from?: string // YYYY-MM-DD (IST), inclusive
+  to?: string // YYYY-MM-DD (IST), inclusive
+}
+
+export type AuditLogFilters = Omit<ListAuditLogsParams, 'page' | 'pageSize'>

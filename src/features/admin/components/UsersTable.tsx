@@ -1,12 +1,10 @@
 import type { ReactNode } from 'react'
 import { BadgeCheck, Clock } from 'lucide-react'
-import { RoleBadge, StatusBadge } from '@/components/page'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { ListTable, RoleBadge, StatusBadge } from '@/components/page'
+import { TableCell, TableRow } from '@/components/ui/table'
 import type { User } from '@/features/auth/types'
 
 const HEADINGS = ['Name', 'Email', 'Phone', 'Role', 'Verified', 'Joined']
-const SKELETON_ROWS = 5
 
 const joinedFormat = new Intl.DateTimeFormat('en-IN', {
   day: 'numeric',
@@ -22,27 +20,15 @@ type UsersTableProps = Readonly<{
 }>
 
 export function UsersTable({ users, isUpdating, footer }: UsersTableProps) {
-  let rows: ReactNode
-  if (!users || isUpdating) rows = <SkeletonRows />
-  else if (users.length === 0) rows = <MessageRow>No users found.</MessageRow>
-  else rows = users.map((user) => <UserRow key={user.id} user={user} />)
-
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <Table aria-busy={isUpdating}>
-        <TableHeader className="bg-muted/50">
-          <TableRow>
-            {HEADINGS.map((heading) => (
-              <TableHead key={heading} className="px-4">
-                {heading}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>{rows}</TableBody>
-      </Table>
-      {footer}
-    </div>
+    <ListTable
+      headings={HEADINGS}
+      items={users}
+      isUpdating={isUpdating}
+      emptyMessage="No users found."
+      renderRow={(user) => <UserRow user={user} />}
+      footer={footer}
+    />
   )
 }
 
@@ -71,28 +57,6 @@ function UserRow({ user }: Readonly<{ user: User }>) {
         )}
       </TableCell>
       <TableCell className="px-4 text-muted-foreground">{joinedFormat.format(new Date(user.createdAt))}</TableCell>
-    </TableRow>
-  )
-}
-
-function SkeletonRows() {
-  return Array.from({ length: SKELETON_ROWS }, (_, row) => (
-    <TableRow key={row}>
-      {HEADINGS.map((heading) => (
-        <TableCell key={heading} className="px-4 py-3">
-          <Skeleton className="h-4 w-24" />
-        </TableCell>
-      ))}
-    </TableRow>
-  ))
-}
-
-function MessageRow({ children }: Readonly<{ children: ReactNode }>) {
-  return (
-    <TableRow>
-      <TableCell colSpan={HEADINGS.length} className="h-24 text-center text-muted-foreground">
-        {children}
-      </TableCell>
     </TableRow>
   )
 }

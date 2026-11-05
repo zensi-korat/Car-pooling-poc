@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
-import { StatusBadge, type Tone } from '@/components/page'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { ListTable, StatusBadge, type Tone } from '@/components/page'
+import { TableCell, TableRow } from '@/components/ui/table'
 import type { AdminRide, RideStatus } from '../types'
 
 const HEADINGS = ['Route', 'Driver', 'Departure', 'Seats', 'Fare', 'Vehicle', 'Status']
-const SKELETON_ROWS = 5
 
 const STATUS_TONES: Record<RideStatus, Tone> = {
   SCHEDULED: 'blue',
@@ -35,27 +33,15 @@ type RidesTableProps = Readonly<{
 }>
 
 export function RidesTable({ rides, isUpdating, footer }: RidesTableProps) {
-  let rows: ReactNode
-  if (!rides || isUpdating) rows = <SkeletonRows />
-  else if (rides.length === 0) rows = <MessageRow>No rides found.</MessageRow>
-  else rows = rides.map((ride) => <RideRow key={ride.id} ride={ride} />)
-
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <Table aria-busy={isUpdating}>
-        <TableHeader className="bg-muted/50">
-          <TableRow>
-            {HEADINGS.map((heading) => (
-              <TableHead key={heading} className="px-4">
-                {heading}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>{rows}</TableBody>
-      </Table>
-      {footer}
-    </div>
+    <ListTable
+      headings={HEADINGS}
+      items={rides}
+      isUpdating={isUpdating}
+      emptyMessage="No rides found."
+      renderRow={(ride) => <RideRow ride={ride} />}
+      footer={footer}
+    />
   )
 }
 
@@ -95,27 +81,5 @@ function TwoLines({ main, sub }: Readonly<{ main: string; sub: string }>) {
       <span className="font-medium">{main}</span>
       <span className="text-xs text-muted-foreground">{sub}</span>
     </div>
-  )
-}
-
-function SkeletonRows() {
-  return Array.from({ length: SKELETON_ROWS }, (_, row) => (
-    <TableRow key={row}>
-      {HEADINGS.map((heading) => (
-        <TableCell key={heading} className="px-4 py-3">
-          <Skeleton className="h-4 w-24" />
-        </TableCell>
-      ))}
-    </TableRow>
-  ))
-}
-
-function MessageRow({ children }: Readonly<{ children: ReactNode }>) {
-  return (
-    <TableRow>
-      <TableCell colSpan={HEADINGS.length} className="h-24 text-center text-muted-foreground">
-        {children}
-      </TableCell>
-    </TableRow>
   )
 }
