@@ -1,17 +1,11 @@
 import type { ReactNode } from 'react'
-import { ListTable, StatusBadge, type Tone } from '@/components/page'
+import { AuditActionBadge, StatusBadge } from '@/components/badges'
+import { ListTable } from '@/components/page'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { humanize } from '@/lib/text'
 import type { AuditLog } from '../api/auditLogSchema'
 
 const HEADINGS = ['When', 'Entity', 'Action', 'By', 'Details']
-
-const ACTION_TONES: Record<string, Tone> = {
-  CREATED: 'blue',
-  CANCELLED: 'red',
-  COMPLETED: 'green',
-  APPROVED: 'purple',
-}
 
 const whenFormat = new Intl.DateTimeFormat('en-IN', {
   day: 'numeric',
@@ -52,7 +46,7 @@ function AuditLogRow({ log }: Readonly<{ log: AuditLog }>) {
         </div>
       </TableCell>
       <TableCell className="px-4">
-        <StatusBadge tone={ACTION_TONES[log.action] ?? 'amber'}>{humanize(log.action)}</StatusBadge>
+        <AuditActionBadge action={log.action} />
       </TableCell>
       <TableCell className="px-4">
         {log.actorId === 'system' ? <StatusBadge>System</StatusBadge> : <ShortId id={log.actorId} />}

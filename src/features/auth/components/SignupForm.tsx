@@ -3,7 +3,8 @@ import { CarFront, Loader2, UserPlus, Users, type LucideIcon } from 'lucide-reac
 import { FormAlert, PasswordField, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { env } from '@/config/env'
-import { isValid, validateSignup } from '../lib/validation'
+import { isValid } from '@/lib/validation'
+import { validateSignup } from '../lib/validation'
 import { SIGNUP_ROLES, type SignupRole, type SignupValues } from '../api/authSchema'
 
 type SignupFormProps = {

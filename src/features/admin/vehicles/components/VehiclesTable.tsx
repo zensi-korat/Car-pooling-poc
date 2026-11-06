@@ -1,24 +1,14 @@
 import type { ReactNode } from 'react'
-import { Check, X } from 'lucide-react'
-import { ListTable, StatusBadge, TwoLines, type Tone } from '@/components/page'
+import { VehicleDocumentBadges, VehicleStatusBadge } from '@/components/badges'
+import { ListTable, TwoLines } from '@/components/page'
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { useCurrentUser } from '@/features/auth/useAuth'
-import type { AdminVehicle, VehicleDocumentType, VehicleStatus } from '../api/vehiclesSchema'
+import { vehicleDocumentTypeSchema } from '@/features/shared/vehicles/api/vehicleSchema'
+import type { AdminVehicle } from '../api/vehiclesSchema'
 import type { Review } from './ReviewVehicleDialog'
 
 const HEADINGS = ['Vehicle', 'Owner', 'Seats', 'Documents', 'Submitted', 'Status', 'Review']
-
-const DOCUMENTS: { type: VehicleDocumentType; label: string }[] = [
-  { type: 'RC', label: 'RC' },
-  { type: 'LICENCE', label: 'Licence' },
-]
-
-const STATUS_TONES: Record<VehicleStatus, Tone> = {
-  PENDING: 'amber',
-  APPROVED: 'green',
-  REJECTED: 'red',
-}
 
 const submittedFormat = new Intl.DateTimeFormat('en-IN', {
   day: 'numeric',
@@ -68,28 +58,13 @@ function VehicleRow({ vehicle, isOwn, onReview }: VehicleRowProps) {
       </TableCell>
       <TableCell className="px-4 text-muted-foreground">{vehicle.seatCapacity}</TableCell>
       <TableCell className="px-4">
-        <span className="flex gap-1">
-          {DOCUMENTS.map(({ type, label }) =>
-            vehicle.documents.some((document) => document.type === type) ? (
-              <StatusBadge key={type} tone="green">
-                <Check /> {label}
-              </StatusBadge>
-            ) : (
-              <StatusBadge key={type} tone="red">
-                <X /> {label}
-              </StatusBadge>
-            ),
-          )}
-        </span>
+        <VehicleDocumentBadges documents={vehicle.documents} />
       </TableCell>
       <TableCell className="px-4 text-muted-foreground">
         {submittedFormat.format(new Date(vehicle.createdAt))}
       </TableCell>
       <TableCell className="px-4">
-        <TwoLines
-          main={<StatusBadge tone={STATUS_TONES[vehicle.status]}>{vehicle.status}</StatusBadge>}
-          sub={vehicle.rejectionNote}
-        />
+        <TwoLines main={<VehicleStatusBadge status={vehicle.status} />} sub={vehicle.rejectionNote} />
       </TableCell>
       <TableCell className="px-4">
         {vehicle.status === 'PENDING' ? (
@@ -106,16 +81,18 @@ function VehicleRow({ vehicle, isOwn, onReview }: VehicleRowProps) {
 
 // Disabled up front where the server would refuse anyway (403 own vehicle, 409 missing documents).
 function ReviewButtons({ vehicle, isOwn, onReview }: VehicleRowProps) {
-  const hasAllDocuments = DOCUMENTS.every(({ type }) => vehicle.documents.some((document) => document.type === type))
+  const documentsComplete = vehicleDocumentTypeSchema.options.every((type) =>
+    vehicle.documents.some((document) => document.type === type),
+  )
   let approveHint: string | undefined
   if (isOwn) approveHint = "You can't review your own vehicle."
-  else if (!hasAllDocuments) approveHint = 'RC and licence must both be uploaded first.'
+  else if (!documentsComplete) approveHint = 'RC and licence must both be uploaded first.'
 
   return (
     <span className="flex gap-2" title={approveHint}>
       <Button
         size="sm"
-        disabled={isOwn || !hasAllDocuments}
+        disabled={isOwn || !documentsComplete}
         onClick={() => onReview({ vehicle, decision: 'APPROVED' })}
       >
         Approve

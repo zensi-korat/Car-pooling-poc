@@ -22,6 +22,7 @@ Auth theory refresher: `~/JS-concepts/api-data-integration/src/auth/AUTH.md`.
 | 13 | Logout + profile (`PATCH /me`) | ✅ |
 | 14 | Dashboard layout like bear-portal-new (sidebar + page sections) | ✅ |
 | 15 | Admin: list users (TanStack Query, pagination, filters): see [LEARN-admin-users.md](LEARN-admin-users.md) | ✅ |
+| 16 | Driver: My Vehicles + role-based access (RBAC): see [LEARN-driver-vehicles.md](LEARN-driver-vehicles.md) | ✅ |
 
 Later: React Hook Form + Zod, MSW mock backend for tests, the other admin lists (rides, audit logs, vehicles), then the car-pooling features (rides, bookings…). TanStack Query was added in step 15.
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { ListTable, RoleBadge } from '@/components/page'
+import { RoleBadge } from '@/components/badges'
+import { ListTable } from '@/components/page'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { AdminUser } from '../api/usersSchema'
 

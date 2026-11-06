@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isValid, validateLogin, validateSignup } from '../validation'
+import { validateLogin, validateSignup } from '../validation'
 
 describe('validateLogin()', () => {
   it('valid email + any password → no errors', () => {
@@ -26,13 +26,6 @@ describe('validateLogin()', () => {
 
   it('does NOT enforce a minimum password length on login', () => {
     expect(validateLogin({ email: 'asha@example.com', password: '123' }).password).toBeUndefined()
-  })
-})
-
-describe('isValid()', () => {
-  it('is true only when there are no errors', () => {
-    expect(isValid({})).toBe(true)
-    expect(isValid({ email: 'Email is required' })).toBe(false)
   })
 })
 

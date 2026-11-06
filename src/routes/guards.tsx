@@ -3,6 +3,7 @@ import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
+import type { Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 
 // Pages for logged-in users only. Logged out → /login, remembering where they wanted to go.
@@ -20,18 +21,19 @@ export function ProtectedRoute() {
   return <Outlet />
 }
 
-// Admin pages. Sits inside ProtectedRoute + DashboardLayout, so the user exists and the sidebar stays.
-// The server checks the role too (403); this only avoids showing a page that can't work.
-export function AdminRoute() {
+// Pages for one role, e.g. <RoleRoute role="DRIVER" />. Sits inside ProtectedRoute + DashboardLayout,
+// so the user exists and the sidebar stays. The server checks the role too (403); this only avoids
+// showing a page that can't work.
+export function RoleRoute({ role }: Readonly<{ role: Role }>) {
   const user = useCurrentUser()
-  if (!user.roles.includes('ADMIN')) return <NoAccess />
+  if (!user.roles.includes(role)) return <NoAccess />
   return <Outlet />
 }
 
 function NoAccess() {
   return (
     <>
-      <PageHeader title="No access" description="This page is only for admins." />
+      <PageHeader title="No access" description="Your account can't open this page." />
       <div className="flex flex-col items-start gap-4 p-6">
         <ShieldX className="size-10 text-muted-foreground" aria-hidden />
         <Button asChild variant="outline">

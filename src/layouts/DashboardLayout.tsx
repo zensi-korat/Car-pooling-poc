@@ -10,6 +10,7 @@ import {
   Sun,
   UserRound,
   Users,
+  type LucideIcon,
 } from 'lucide-react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -39,16 +40,21 @@ import {
 } from '@/components/ui/sidebar'
 import { Switch } from '@/components/ui/switch'
 import { env } from '@/config/env'
+import type { Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 
-const NAV_ITEMS = [
+// No `role` → every logged-in user sees it.
+type NavItem = { to: string; label: string; Icon: LucideIcon; role?: Role }
+
+const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/profile', label: 'My Profile', Icon: UserRound },
-  { to: '/admin/users', label: 'Users', Icon: Users, adminOnly: true },
-  { to: '/admin/rides', label: 'Rides', Icon: Car, adminOnly: true },
-  { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, adminOnly: true },
-  { to: '/admin/audit-logs', label: 'Audit log', Icon: History, adminOnly: true },
+  { to: '/driver/vehicles', label: 'My Vehicles', Icon: CarFront, role: 'DRIVER' },
+  { to: '/admin/users', label: 'Users', Icon: Users, role: 'ADMIN' },
+  { to: '/admin/rides', label: 'Rides', Icon: Car, role: 'ADMIN' },
+  { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, role: 'ADMIN' },
+  { to: '/admin/audit-logs', label: 'Audit log', Icon: History, role: 'ADMIN' },
 ]
 
 export function DashboardLayout() {
@@ -71,8 +77,7 @@ function AppSidebar() {
   const { pathname } = useLocation()
   const { isMobile, setOpenMobile } = useSidebar()
   const user = useCurrentUser()
-  const isAdmin = user.roles.includes('ADMIN')
-  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin)
+  const navItems = NAV_ITEMS.filter((item) => !item.role || user.roles.includes(item.role))
 
   return (
     <Sidebar collapsible="icon">
