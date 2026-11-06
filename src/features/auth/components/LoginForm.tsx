@@ -2,7 +2,8 @@ import { useRef, useState, type SubmitEvent } from 'react'
 import { Loader2, LogIn } from 'lucide-react'
 import { FormAlert, PasswordField, TextField } from '@/components/form'
 import { Button } from '@/components/ui/button'
-import { isValid, validateLogin } from '../lib/validation'
+import { isValid } from '@/lib/validation'
+import { validateLogin } from '../lib/validation'
 import type { LoginValues } from '../api/authSchema'
 
 type LoginFormProps = {

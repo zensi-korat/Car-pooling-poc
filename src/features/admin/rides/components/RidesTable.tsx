@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { ListTable, StatusBadge, TwoLines, type Tone } from '@/components/page'
+import { StatusBadge, type Tone } from '@/components/badges'
+import { ListTable, TwoLines } from '@/components/page'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { AdminRide, RideStatus } from '../api/ridesSchema'
 

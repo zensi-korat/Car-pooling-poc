@@ -1,11 +1,10 @@
+import { vehicleSchema, type Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
 import { api, pageSchema, type Page } from '@/services/api'
 import {
   adminVehicleSchema,
-  vehicleSchema,
   type AdminVehicle,
   type ListVehiclesParams,
   type ReviewVehicleBody,
-  type Vehicle,
 } from './vehiclesSchema'
 
 const vehiclesPageSchema = pageSchema(adminVehicleSchema)

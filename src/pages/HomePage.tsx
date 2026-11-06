@@ -1,5 +1,6 @@
 import { IdCard } from 'lucide-react'
-import { DetailRow, PageHeader, RoleBadge, SectionCard, VerifiedBadge } from '@/components/page'
+import { RoleBadge, VerifiedBadge } from '@/components/badges'
+import { DetailRow, PageHeader, SectionCard } from '@/components/page'
 import { useCurrentUser } from '@/features/auth/useAuth'
 
 export function HomePage() {

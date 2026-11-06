@@ -1,11 +1,10 @@
 import { Fragment, type ComponentType, type ReactNode } from 'react'
-import { BadgeCheck, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { Role } from '@/features/auth/api/authSchema'
 import { PAGE_SIZES } from '@/lib/pagination'
 
 type PageHeaderProps = Readonly<{
@@ -54,51 +53,6 @@ export function DetailRow({ label, children }: Readonly<{ label: string; childre
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="min-w-0 truncate font-medium">{children}</dd>
     </div>
-  )
-}
-
-const TONES = {
-  neutral: 'bg-muted text-muted-foreground',
-  green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  red: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-}
-
-export type Tone = keyof typeof TONES
-
-type StatusBadgeProps = Readonly<{ tone?: Tone; children: ReactNode }>
-
-export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium [&>svg]:size-3 ${TONES[tone]}`}
-    >
-      {children}
-    </span>
-  )
-}
-
-const ROLE_TONES: Record<Role, Tone> = {
-  ADMIN: 'purple',
-  DRIVER: 'blue',
-  RIDER: 'green',
-}
-
-export function RoleBadge({ role }: Readonly<{ role: Role }>) {
-  return <StatusBadge tone={ROLE_TONES[role]}>{role}</StatusBadge>
-}
-
-export function VerifiedBadge({ verified }: Readonly<{ verified: boolean }>) {
-  return verified ? (
-    <StatusBadge tone="green">
-      <BadgeCheck /> Verified
-    </StatusBadge>
-  ) : (
-    <StatusBadge tone="amber">
-      <Clock /> Not verified
-    </StatusBadge>
   )
 }
 

@@ -6,7 +6,7 @@ import { VehiclesFilters } from '@/features/admin/vehicles/components/VehiclesFi
 import { VehiclesTable } from '@/features/admin/vehicles/components/VehiclesTable'
 import { useAdminVehicles } from '@/features/admin/vehicles/hooks/useAdminVehicles'
 import { readVehicleFilters } from '@/features/admin/vehicles/lib/filters'
-import type { VehicleStatus } from '@/features/admin/vehicles/api/vehiclesSchema'
+import type { VehicleStatus } from '@/features/shared/vehicles/api/vehicleSchema'
 import { useListParams } from '@/hooks/useListParams'
 
 const DESCRIPTIONS: Record<VehicleStatus, (total: number) => string> = {

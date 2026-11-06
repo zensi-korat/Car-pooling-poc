@@ -15,6 +15,8 @@ Reference project for patterns and standards: `~/Bear REPOS/bear-portal-new` (co
 
 - Explain every action **before** doing it, in plain, simple words. Work in small steps.
 - Build the simplest working version. Offer refinements, but don't build them unasked.
+- **Don't over-engineer.** No helper, wrapper, map, file or folder until it's actually needed (used in a second
+  place, or the code is hard to read without it). Inline a one-line check instead of a helper + test.
 - No teaching comments in components. Explanations go in the chat and the `LEARN*.md` files.
   Short comments that explain *why* (a server rule, a gotcha) are fine.
 - Show the server's own error messages (`getErrorMessage`, `FormAlert`), not invented ones.
@@ -46,13 +48,13 @@ src/
   pages/
     admin/                 Admin*Page.tsx
     driver/  rider/        one folder per role; public/auth pages stay in pages/
-  components/              shared UI: page.tsx (PageHeader, ListTable, TwoLines, badges…), form.tsx, DateRangeFilter
+  components/              shared UI: page.tsx (PageHeader, ListTable, TwoLines…), badges.tsx, form.tsx, DateRangeFilter
   components/ui/           shadcn components (generated: don't hand-edit unless needed)
   hooks/                   shared hooks: useListParams, useDebouncedValue…
   lib/                     shared helpers: filters, dates, pagination, text, queryClient
   services/api/            the HTTP client: api(), ApiError, getErrorMessage, pageSchema/Page
-  routes/                  AppRoutes + guards (one guard per role, e.g. AdminRoute)
-  layouts/                 DashboardLayout (sidebar NAV_ITEMS, adminOnly flags)
+  routes/                  AppRoutes + guards (`<RoleRoute role="DRIVER" />` for role pages)
+  layouts/                 DashboardLayout (sidebar NAV_ITEMS, each with an optional `role`)
 ```
 
 Every module has the same inside:
@@ -72,7 +74,7 @@ Every module has the same inside:
   `@/services/api`, `@/features/auth`, `@/features/shared`).
 - **Never import from another role's folder** (driver → admin, admin → rider, …). If two roles need the same
   thing (e.g. the base `rideSchema`), move it to `features/shared/<module>/` and import from there in both.
-- Admin modules call `/api/admin/*` endpoints. Role pages sit behind their own route guard, and sidebar
+- Admin modules call `/api/admin/*` endpoints. Role pages sit behind `RoleRoute`, and sidebar
   items are flagged per role.
 - Inside a module, use relative imports (`../api/…`). Between folders, use the `@/` alias.
 
@@ -110,6 +112,7 @@ Every module has the same inside:
 
 ## UI: always shadcn + Tailwind
 
+- Every status badge (and its colours) lives in `src/components/badges.tsx`; add new ones there.
 - Use shadcn components for all UI (`Button`, `Select`, `Dialog`, `Table`, `Badge`, `Skeleton`, `Calendar`, …).
   Add missing ones with `npx shadcn@latest add <name>`. No raw HTML controls when a shadcn one exists.
 - Style only with Tailwind classes. No inline `style`, no CSS files besides `src/index.css` theme tokens.
