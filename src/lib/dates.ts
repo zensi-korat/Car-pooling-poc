@@ -12,3 +12,11 @@ export function fromDateText(text: string): Date {
   const [year, month, day] = text.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
+
+// The calendar day in India, as "YYYY-MM-DD" (en-CA writes dates that way), so days compare as text.
+const istDayFormat = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' })
+
+// The server's cancel rule (rides and bookings): allowed only before the departure day starts in India.
+export function isBeforeDepartureDay(departureTime: string, now: Date): boolean {
+  return istDayFormat.format(now) < istDayFormat.format(new Date(departureTime))
+}

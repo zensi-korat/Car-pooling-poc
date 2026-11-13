@@ -7,7 +7,9 @@ import {
   LayoutDashboard,
   LogOut,
   Moon,
+  Route,
   Sun,
+  Ticket,
   UserRound,
   Users,
   type LucideIcon,
@@ -43,6 +45,7 @@ import { env } from '@/config/env'
 import type { Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { initials } from '@/lib/text'
 
 // No `role` → every logged-in user sees it.
 type NavItem = { to: string; label: string; Icon: LucideIcon; role?: Role }
@@ -51,6 +54,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/profile', label: 'My Profile', Icon: UserRound },
   { to: '/driver/vehicles', label: 'My Vehicles', Icon: CarFront, role: 'DRIVER' },
+  { to: '/driver/rides', label: 'My Rides', Icon: Route, role: 'DRIVER' },
+  { to: '/rider/bookings', label: 'My Bookings', Icon: Ticket, role: 'RIDER' },
   { to: '/admin/users', label: 'Users', Icon: Users, role: 'ADMIN' },
   { to: '/admin/rides', label: 'Rides', Icon: Car, role: 'ADMIN' },
   { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, role: 'ADMIN' },
@@ -191,10 +196,4 @@ function NavUser() {
       </SidebarMenuItem>
     </SidebarMenu>
   )
-}
-
-function initials(name: string): string {
-  const [first = '', ...rest] = name.trim().split(/\s+/)
-  const last = rest.at(-1) ?? ''
-  return (first.charAt(0) + last.charAt(0)).toUpperCase()
 }

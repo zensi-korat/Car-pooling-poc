@@ -1,5 +1,5 @@
 import { Fragment, type ComponentType, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -199,5 +199,44 @@ export function TablePagination({
         </div>
       </div>
     </nav>
+  )
+}
+
+// Two dots joined by a line: hollow = start, filled = destination.
+export function RouteLine({ from, to }: Readonly<{ from: string; to: string }>) {
+  return (
+    <div className="flex min-w-0 gap-3">
+      <div className="flex flex-col items-center py-1.5">
+        <span className="size-2.5 rounded-full border-2 border-primary" />
+        <span className="my-1 w-px flex-1 bg-border" />
+        <span className="size-2.5 rounded-full bg-primary" />
+      </div>
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="flex min-w-0 flex-col">
+          <span className="text-xs text-muted-foreground">From</span>
+          <span className="truncate text-base font-medium">{from}</span>
+        </div>
+        <div className="flex min-w-0 flex-col">
+          <span className="text-xs text-muted-foreground">To</span>
+          <span className="truncate text-base font-medium">{to}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function InfoTile({
+  Icon,
+  label,
+  children,
+}: Readonly<{ Icon: LucideIcon; label: string; children: ReactNode }>) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1 rounded-lg bg-muted/50 p-3">
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Icon className="size-3.5" />
+        {label}
+      </span>
+      {children}
+    </div>
   )
 }

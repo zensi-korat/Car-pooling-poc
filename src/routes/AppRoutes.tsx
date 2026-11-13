@@ -4,11 +4,13 @@ import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage'
 import { AdminRidesPage } from '@/pages/admin/AdminRidesPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { AdminVehiclesPage } from '@/pages/admin/AdminVehiclesPage'
+import { DriverRidesPage } from '@/pages/driver/DriverRidesPage'
 import { DriverVehiclesPage } from '@/pages/driver/DriverVehiclesPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import { RiderBookingsPage } from '@/pages/rider/RiderBookingsPage'
 import { SignupPage } from '@/pages/SignupPage'
 import { VerifyPhonePage } from '@/pages/VerifyPhonePage'
 import { GuestRoute, ProtectedRoute, RoleRoute } from './guards'
@@ -32,6 +34,11 @@ export function AppRoutes() {
 
           <Route element={<RoleRoute role="DRIVER" />}>
             <Route path="/driver/vehicles" element={<DriverVehiclesPage />} />
+            <Route path="/driver/rides" element={<DriverRidesPage />} />
+          </Route>
+
+          <Route element={<RoleRoute role="RIDER" />}>
+            <Route path="/rider/bookings" element={<RiderBookingsPage />} />
           </Route>
         </Route>
       </Route>
