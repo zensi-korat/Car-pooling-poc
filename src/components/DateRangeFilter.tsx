@@ -4,12 +4,10 @@ import type { DateRange } from 'react-day-picker'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { fromDateText, toDateText } from '@/lib/dates'
+import { formatDayText, fromDateText, toDateText } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 
 export type DateTextRange = { from?: string; to?: string }
-
-const labelFormat = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
 type DateRangeFilterProps = Readonly<{
   id?: string
@@ -78,9 +76,8 @@ function toRange({ from, to }: DateTextRange): DateRange | undefined {
 }
 
 function describe({ from, to }: DateTextRange): string {
-  const show = (text: string) => labelFormat.format(fromDateText(text))
-  if (from && to) return `${show(from)} – ${show(to)}`
-  if (from) return `From ${show(from)}`
-  if (to) return `Until ${show(to)}`
+  if (from && to) return `${formatDayText(from)} – ${formatDayText(to)}`
+  if (from) return `From ${formatDayText(from)}`
+  if (to) return `Until ${formatDayText(to)}`
   return ''
 }

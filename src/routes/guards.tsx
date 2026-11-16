@@ -3,7 +3,7 @@ import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import type { Role } from '@/features/auth/api/authSchema'
+import { roleSchema, type Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 
 // Pages for logged-in users only. Logged out → /login, remembering where they wanted to go.
@@ -46,20 +46,27 @@ function NoAccess() {
 
 // Pages for logged-out users only (login, signup). Logged in → back to where they wanted to go.
 export function GuestRoute() {
-  const { status } = useAuth()
+  const auth = useAuth()
   const location = useLocation()
 
-  if (status === 'loading') return <SessionCheck />
-  if (status === 'authenticated') return <Navigate to={redirectTarget(location.state)} replace />
+  if (auth.status === 'loading') return <SessionCheck />
+  if (auth.status === 'authenticated') {
+    return <Navigate to={redirectTarget(location.state, auth.user.roles)} replace />
+  }
   return <Outlet />
 }
 
 // `state` is unknown (anything could be in it), so check it before trusting it.
 // Only paths inside this app: "/rides" is fine, "//evil.com" (another website) is not.
-function redirectTarget(state: unknown): string {
+function redirectTarget(state: unknown, roles: Role[]): string {
   const from = (state as { from?: { pathname?: unknown; search?: unknown; hash?: unknown } } | null)?.from
   if (typeof from?.pathname !== 'string') return '/'
   if (!from.pathname.startsWith('/') || from.pathname.startsWith('//')) return '/'
+
+  // Another role's page (/rider/…, /admin/…) was remembered from someone else's session: the dashboard instead.
+  const path = from.pathname
+  const pageRole = roleSchema.options.find((role) => path.startsWith(`/${role.toLowerCase()}/`))
+  if (pageRole && !roles.includes(pageRole)) return '/'
 
   const search = typeof from.search === 'string' ? from.search : ''
   const hash = typeof from.hash === 'string' ? from.hash : ''

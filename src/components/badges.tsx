@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { BadgeCheck, Check, Clock, X } from 'lucide-react'
 import type { Role } from '@/features/auth/api/authSchema'
+import type { BookingStatus } from '@/features/shared/bookings/api/bookingSchema'
+import type { RideStatus } from '@/features/shared/rides/api/rideSchema'
 import {
   vehicleDocumentTypeSchema,
   type Vehicle,
@@ -86,6 +88,25 @@ export function VehicleDocumentBadges({ documents }: Readonly<{ documents: Vehic
       )}
     </span>
   )
+}
+
+const RIDE_STATUS_TONES: Record<RideStatus, Tone> = {
+  SCHEDULED: 'blue',
+  COMPLETED: 'green',
+  CANCELLED: 'red',
+}
+
+export function RideStatusBadge({ status }: Readonly<{ status: RideStatus }>) {
+  return <StatusBadge tone={RIDE_STATUS_TONES[status]}>{status}</StatusBadge>
+}
+
+const BOOKING_STATUS_TONES: Record<BookingStatus, Tone> = {
+  CONFIRMED: 'green',
+  CANCELLED: 'red',
+}
+
+export function BookingStatusBadge({ status }: Readonly<{ status: BookingStatus }>) {
+  return <StatusBadge tone={BOOKING_STATUS_TONES[status]}>{status}</StatusBadge>
 }
 
 // The server may add new actions, so unknown ones fall back to amber.

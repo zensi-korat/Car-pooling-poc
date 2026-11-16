@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { humanize } from '../text'
+import { humanize, initials } from '../text'
 
 describe('humanize', () => {
   it('turns UPPER_SNAKE codes into a sentence', () => {
@@ -13,5 +13,15 @@ describe('humanize', () => {
 
   it('leaves an empty string empty', () => {
     expect(humanize('')).toBe('')
+  })
+})
+
+describe('initials', () => {
+  it('takes the first letters of the first and last words', () => {
+    expect(initials('  dara  k  driver ')).toBe('DD')
+  })
+
+  it('works with a single name', () => {
+    expect(initials('Madonna')).toBe('M')
   })
 })

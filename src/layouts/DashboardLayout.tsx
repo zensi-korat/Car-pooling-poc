@@ -3,16 +3,22 @@ import {
   ClipboardCheck,
   CarFront,
   ChevronsUpDown,
+  CirclePlus,
   History,
   LayoutDashboard,
   LogOut,
   Moon,
+  Route,
+  Search,
   Sun,
+  Ticket,
   UserRound,
   Users,
   type LucideIcon,
 } from 'lucide-react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Link, Outlet, useLocation } from 'react-router'
+import { PageError } from '@/components/PageError'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -43,6 +49,7 @@ import { env } from '@/config/env'
 import type { Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { initials } from '@/lib/text'
 
 // No `role` → every logged-in user sees it.
 type NavItem = { to: string; label: string; Icon: LucideIcon; role?: Role }
@@ -51,6 +58,10 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/profile', label: 'My Profile', Icon: UserRound },
   { to: '/driver/vehicles', label: 'My Vehicles', Icon: CarFront, role: 'DRIVER' },
+  { to: '/driver/rides', label: 'My Rides', Icon: Route, role: 'DRIVER' },
+  { to: '/driver/rides/new', label: 'Post a Ride', Icon: CirclePlus, role: 'DRIVER' },
+  { to: '/rider/search', label: 'Find a Ride', Icon: Search, role: 'RIDER' },
+  { to: '/rider/bookings', label: 'My Bookings', Icon: Ticket, role: 'RIDER' },
   { to: '/admin/users', label: 'Users', Icon: Users, role: 'ADMIN' },
   { to: '/admin/rides', label: 'Rides', Icon: Car, role: 'ADMIN' },
   { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, role: 'ADMIN' },
@@ -58,6 +69,8 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export function DashboardLayout() {
+  const { pathname } = useLocation()
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -66,7 +79,10 @@ export function DashboardLayout() {
           <SidebarTrigger />
         </header>
         <div className="flex-1">
-          <Outlet />
+          {/* A crashing page shows PageError; the sidebar keeps working. Opening another page clears it. */}
+          <ErrorBoundary FallbackComponent={PageError} resetKeys={[pathname]}>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </SidebarInset>
     </SidebarProvider>
@@ -191,10 +207,4 @@ function NavUser() {
       </SidebarMenuItem>
     </SidebarMenu>
   )
-}
-
-function initials(name: string): string {
-  const [first = '', ...rest] = name.trim().split(/\s+/)
-  const last = rest.at(-1) ?? ''
-  return (first.charAt(0) + last.charAt(0)).toUpperCase()
 }

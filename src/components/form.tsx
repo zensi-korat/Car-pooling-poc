@@ -4,6 +4,7 @@
 import { useId, useState, type ComponentProps, type ReactNode } from 'react'
 import { CircleAlert, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -127,5 +128,30 @@ export function FormAlert({ children }: Readonly<{ children: ReactNode }>) {
       <CircleAlert className="mt-0.5 size-4 shrink-0" />
       <span>{children}</span>
     </div>
+  )
+}
+
+// ─── LabeledField ───────────────────────────────────────────────────────────
+// Label + control + hint + first error, for TanStack Form fields (shadcn's Field pieces).
+// The control inside needs id={field.name} and aria-invalid={!field.state.meta.isValid}.
+type LabeledFieldProps = Readonly<{
+  name: string // the control's id: clicking the label focuses it
+  label: string
+  description?: string
+  errors: ReadonlyArray<{ message?: string } | undefined>
+  children: ReactNode
+}>
+
+export function LabeledField({ name, label, description, errors, children }: LabeledFieldProps) {
+  // Zod can report several problems for one field; we show only the first.
+  const shown = errors.filter(Boolean).slice(0, 1)
+
+  return (
+    <Field data-invalid={shown.length > 0}>
+      <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      {children}
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={shown} />
+    </Field>
   )
 }

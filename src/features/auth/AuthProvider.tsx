@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
 import {
   getMe,
   login as loginRequest,
@@ -15,6 +16,7 @@ import { AuthContext, type AuthState } from './useAuth'
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [state, setState] = useState<AuthState>({ status: 'loading', user: null })
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // Ending a session also empties the TanStack Query cache,
   // so the next person on this browser never sees the previous user's data.
@@ -72,11 +74,13 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, [])
 
   // Logged out locally even if the request fails: the user asked to leave.
-  // ProtectedRoute then sends them to /login.
+  // Straight to /login without remembering the page: the next person may have another role and land on
+  // "No access". (An expired session still remembers it, through ProtectedRoute.)
   const logout = useCallback(async () => {
     await logoutRequest().catch(() => undefined)
     endSession()
-  }, [endSession])
+    navigate('/login', { replace: true })
+  }, [endSession, navigate])
 
   // Same object until something changes, so useAuth() users don't re-render for nothing.
   const value = useMemo(
