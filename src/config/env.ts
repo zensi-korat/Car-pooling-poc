@@ -6,4 +6,6 @@ export const env = {
   appName: import.meta.env.VITE_APP_NAME || 'Pool',
   // '' = same origin (dev proxy). A full URL = call the backend directly (cross-origin).
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? '',
+  // LocationIQ access token for place search. Public by nature: restrict it to our sites in its dashboard.
+  locationIqKey: import.meta.env.VITE_LOCATIONIQ_KEY ?? '',
 }

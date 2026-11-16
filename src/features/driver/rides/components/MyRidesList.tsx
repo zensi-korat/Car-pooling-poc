@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Ban, CalendarClock, Car, CircleCheck, Route, Users, type LucideIcon } from 'lucide-react'
+import { Ban, CalendarClock, Car, CircleCheck, Pencil, Route, Users, type LucideIcon } from 'lucide-react'
+import { Link } from 'react-router'
 import { RideStatusBadge } from '@/components/badges'
 import { InfoTile, RouteLine } from '@/components/page'
+import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Progress } from '@/components/ui/progress'
@@ -113,7 +115,7 @@ function RideCards({ rides, tab, now }: Readonly<{ rides: Ride[] | undefined; ta
 }
 
 function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
-  const { canCancel, canComplete } = getRideActions(ride, now)
+  const { canEdit, canCancel, canComplete } = getRideActions(ride, now)
   const booked = ride.totalSeats - ride.seatsAvailable
 
   let hint: string | undefined
@@ -171,7 +173,15 @@ function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
       </CardContent>
 
       <CardFooter className="flex-wrap justify-end gap-2">
-        <RideBookingsSheet ride={ride} />
+        <RideBookingsSheet ride={ride} canCancelBookings={canCancel} />
+        {canEdit && (
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/driver/rides/${ride.id}/edit`}>
+              <Pencil data-icon="inline-start" />
+              Edit
+            </Link>
+          </Button>
+        )}
         {canComplete && <CompleteRideButton ride={ride} />}
         {canCancel && <CancelRideButton ride={ride} />}
       </CardFooter>

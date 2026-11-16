@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { rideSchema, type Ride } from '@/features/shared/rides/api/rideSchema'
 import { api } from '@/services/api'
-import { rideBookingSchema, type RideBooking } from './ridesSchema'
+import { rideBookingSchema, type RideBody, type RideBooking } from './ridesSchema'
 
 const ridesSchema = z.array(rideSchema)
 const rideBookingsSchema = z.array(rideBookingSchema)
@@ -25,4 +25,16 @@ export function completeRide(id: string): Promise<Ride> {
 // GET /api/rides/{id}/bookings → every booking on the driver's own ride, cancelled ones included.
 export function listRideBookings(id: string, signal?: AbortSignal): Promise<RideBooking[]> {
   return api(`/api/rides/${id}/bookings`, { signal, schema: rideBookingsSchema })
+}
+
+// POST /api/rides → the new SCHEDULED ride. 400 past time or a fare outside the route's range (the message
+// names the range), 409 vehicle not approved, 429 too many writes (20 a minute).
+export function createRide(body: RideBody): Promise<Ride> {
+  return api('/api/rides', { method: 'POST', body, schema: rideSchema })
+}
+
+// PATCH /api/rides/{id} → the updated ride (same body as POST; seats reset to the vehicle's capacity).
+// 409 the ride is no longer SCHEDULED or has a confirmed booking; otherwise the same errors as POST.
+export function updateRide(id: string, body: RideBody): Promise<Ride> {
+  return api(`/api/rides/${id}`, { method: 'PATCH', body, schema: rideSchema })
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fromDateText, isBeforeDepartureDay, toDateText } from '../dates'
+import { formatDayText, fromDateText, isBeforeDepartureDay, toDateText, toDateTimeText, toIstDayText } from '../dates'
 
 describe('toDateText', () => {
   it('pads month and day', () => {
@@ -31,5 +31,29 @@ describe('isBeforeDepartureDay', () => {
 
   it('is false from midnight of the departure day in India, even if UTC is still the day before', () => {
     expect(isBeforeDepartureDay(departure, new Date('2026-11-19T18:30:00.000Z'))).toBe(false) // 20 Nov, 00:00 IST
+  })
+})
+
+describe('formatDayText', () => {
+  it('writes the day for people', () => {
+    expect(formatDayText('2026-11-20')).toBe('20 Nov 2026')
+  })
+})
+
+describe('toDateTimeText', () => {
+  it('writes the local day and time, padded', () => {
+    expect(toDateTimeText(new Date(2026, 10, 20, 9, 5))).toBe('2026-11-20T09:05')
+  })
+
+  it('round-trips through new Date()', () => {
+    const moment = new Date(2026, 10, 20, 21, 30)
+    expect(new Date(toDateTimeText(moment)).getTime()).toBe(moment.getTime())
+  })
+})
+
+describe('toIstDayText', () => {
+  it('gives the day in India, which can be a day ahead of UTC', () => {
+    expect(toIstDayText('2026-11-19T18:29:00.000Z')).toBe('2026-11-19') // 11:59 pm IST
+    expect(toIstDayText('2026-11-19T18:30:00.000Z')).toBe('2026-11-20') // midnight IST
   })
 })

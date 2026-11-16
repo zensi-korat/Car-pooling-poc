@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { cancelBooking } from '../api/bookingsApi'
+import { cancelBooking } from '@/features/shared/bookings/api/bookingsApi'
 
 export function useCancelBooking() {
   const queryClient = useQueryClient()
