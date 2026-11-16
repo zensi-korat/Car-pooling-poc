@@ -17,7 +17,7 @@ export function RiderSearchPage() {
   return (
     <>
       <PageHeader title="Find a ride" description="Upcoming rides on your route that still have a free seat." />
-      <div className="flex flex-col gap-6 p-6">
+      <div className="flex max-w-5xl flex-col gap-6 p-6">
         <SearchForm isSearching={isFetching} onSearch={setParams} />
         {results}
       </div>
