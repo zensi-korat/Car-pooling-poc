@@ -24,6 +24,3 @@ export type CreateVehicleBody = {
 
 // Body of PATCH /api/vehicles/{id}: only the fields that changed (an empty body is a 400).
 export type UpdateVehicleBody = Partial<CreateVehicleBody>
-
-// GET /api/vehicles/{id}/documents/{type}: a signed link that works for 60 seconds and forces a download.
-export const documentUrlSchema = z.object({ url: z.string() })

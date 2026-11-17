@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { createRide } from '../api/ridesApi'
 
 export function useCreateRide() {
@@ -6,6 +7,6 @@ export function useCreateRide() {
 
   return useMutation({
     mutationFn: createRide,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['driver', 'rides'] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.driver.rides }),
   })
 }

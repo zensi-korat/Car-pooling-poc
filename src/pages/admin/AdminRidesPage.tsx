@@ -4,7 +4,7 @@ import { RidesFilters } from '@/features/admin/rides/components/RidesFilters'
 import { RidesTable } from '@/features/admin/rides/components/RidesTable'
 import { useAdminRides } from '@/features/admin/rides/hooks/useAdminRides'
 import { hasFilters } from '@/lib/filters'
-import { readRideFilters } from '@/features/admin/rides/lib/filters'
+import { readRideFilters } from '@/features/admin/rides/rides'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useListParams } from '@/hooks/useListParams'
 

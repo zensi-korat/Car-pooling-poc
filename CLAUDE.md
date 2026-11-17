@@ -52,6 +52,7 @@ src/
   components/ui/           shadcn components (generated: don't hand-edit unless needed)
   hooks/                   shared hooks: useListParams, useDebouncedValue…
   lib/                     shared helpers: filters, dates, pagination, text, queryClient
+  constants/               routes.ts (ROUTES: every page path) and queryKeys.ts (QUERY_KEYS: every query key)
   services/api/            the HTTP client: api(), ApiError, getErrorMessage, pageSchema/Page
   routes/                  AppRoutes + guards (`<RoleRoute role="DRIVER" />` for role pages)
   layouts/                 DashboardLayout (sidebar NAV_ITEMS, each with an optional `role`)
@@ -65,13 +66,16 @@ Every module has the same inside:
   api/<module>Api.ts       the request functions; nothing else calls URLs
   components/              the module's UI (PascalCase .tsx files)
   hooks/                   TanStack Query hooks (useXxx.ts)
-  lib/                     helpers + __tests__/
+  <module>.ts              the module's helpers (filters, rules), one file named after it, e.g. rides/rides.ts
+  __tests__/<module>.test.ts
 ```
+
+No `lib/` folder per module: a module's helpers go in its one `<module>.ts` file (only when it has helpers).
 
 ### Rules for keeping roles separate
 
 - A module imports only from **itself** or from **shared places** (`@/components`, `@/hooks`, `@/lib`,
-  `@/services/api`, `@/features/auth`, `@/features/shared`).
+  `@/constants`, `@/services/api`, `@/features/auth`, `@/features/shared`).
 - **Never import from another role's folder** (driver → admin, admin → rider, …). If two roles need the same
   thing (e.g. the base `rideSchema`), move it to `features/shared/<module>/` and import from there in both.
 - Admin modules call `/api/admin/*` endpoints. Role pages sit behind `RoleRoute`, and sidebar
@@ -91,20 +95,26 @@ Every module has the same inside:
   free-form object → `z.record(z.string(), z.unknown())`; fields only described in text → add them after
   checking real data. Always check a **real response**, not Swagger's example.
 - Zod drops fields the schema doesn't list, so add a field to the schema before using it.
-- Form rules are Zod schemas too (see `auth/api/authSchema.ts` + `auth/lib/validation.ts`).
+- Form rules are Zod schemas too (see `auth/api/authSchema.ts` + `auth/auth.ts`).
 - Request params and bodies we build ourselves stay plain TS types (nothing to check at runtime).
 
 ## Data fetching (TanStack Query)
 
-- Query keys: `['admin', '<list>', params]` (role first, so `invalidateQueries({ queryKey: ['admin'] })` refreshes them all).
+- Query keys live only in `@/constants/queryKeys` (`QUERY_KEYS.admin.users(params)`). Role first, so
+  `invalidateQueries({ queryKey: QUERY_KEYS.admin.all })` refreshes them all. Never write a key array in a hook.
 - Lists use `placeholderData: keepPreviousData`, and `isPlaceholderData` shows the skeleton.
 - Mutations live in their own hook (`useReviewVehicle`) and invalidate the affected keys in `onSettled`.
   Close dialogs or forms with the per-call `onSuccess`.
 
+## Routes
+
+- Every page path lives only in `@/constants/routes` (`ROUTES.driver.rides`). Never write a `'/…'` path string
+  in `path=`, `to=` or `navigate()`. Paths with params: `generatePath(ROUTES.driver.editRide, { id })`.
+
 ## Lists, filters and the URL
 
 - Page, page size and filters live in the URL via `useListParams(readXxxFilters)`. Defaults are kept out of the URL.
-- Each module's `lib/filters.ts` reads its filters **safely**: unknown values become `undefined`
+- Each module's `<module>.ts` reads its filters **safely**: unknown values become `undefined`
   (use `readSearch` and `readDateRange` from `@/lib/filters`).
 - Tables use the shared `ListTable` (skeleton / empty / rows + footer slot) and `TwoLines`.
 - Dates: local-day helpers in `@/lib/dates` (never `toISOString()` for a calendar day). Display with
@@ -129,5 +139,5 @@ Every module has the same inside:
 - Group small related components in one file. Keep pages thin: hooks + feature components.
 - `Record<Union, X>` for exhaustive maps; `Record<string, X>` + `??` fallback when the server may add values.
 - No `any`; use `unknown` and narrow it.
-- Pure functions in `lib/` get Vitest tests in `__tests__/` next to them.
+- Pure functions (in `src/lib/` or a module's `<module>.ts`) get Vitest tests in `__tests__/` next to them.
 - Match the surrounding code: Prettier (no semicolons, single quotes, width 120), oxlint clean.

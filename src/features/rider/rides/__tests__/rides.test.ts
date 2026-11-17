@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toSearchParams } from '../search'
+import { toSearchParams } from '../rides'
 
 const kalupur = { id: 'a', label: 'Kalupur Railway Station', address: 'Ahmedabad', lat: 23.0247, lng: 72.6031 }
 const iskcon = { id: 'b', label: 'Iskcon Cross Roads', address: 'Ahmedabad', lat: 23.0273, lng: 72.5075 }

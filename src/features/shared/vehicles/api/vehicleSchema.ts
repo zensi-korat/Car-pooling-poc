@@ -22,3 +22,6 @@ export const vehicleSchema = z.object({
   documents: z.array(z.object({ type: vehicleDocumentTypeSchema, uploadedAt: z.string() })),
 })
 export type Vehicle = z.infer<typeof vehicleSchema>
+
+// GET /api/vehicles/{id}/documents/{type}: a signed link that works for 60 seconds and forces a download.
+export const documentUrlSchema = z.object({ url: z.string() })

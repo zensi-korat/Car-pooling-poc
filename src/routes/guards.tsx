@@ -3,6 +3,7 @@ import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/constants/routes'
 import { roleSchema, type Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 
@@ -13,11 +14,11 @@ export function ProtectedRoute() {
   const location = useLocation()
 
   if (auth.status === 'loading') return <SessionCheck />
-  if (auth.status === 'unauthenticated') return <Navigate to="/login" replace state={{ from: location }} />
+  if (auth.status === 'unauthenticated') return <Navigate to={ROUTES.login} replace state={{ from: location }} />
 
-  const onVerifyPage = location.pathname === '/verify-phone'
-  if (!auth.user.phoneVerified && !onVerifyPage) return <Navigate to="/verify-phone" replace />
-  if (auth.user.phoneVerified && onVerifyPage) return <Navigate to="/" replace />
+  const onVerifyPage = location.pathname === ROUTES.verifyPhone
+  if (!auth.user.phoneVerified && !onVerifyPage) return <Navigate to={ROUTES.verifyPhone} replace />
+  if (auth.user.phoneVerified && onVerifyPage) return <Navigate to={ROUTES.home} replace />
   return <Outlet />
 }
 
@@ -37,7 +38,7 @@ function NoAccess() {
       <div className="flex flex-col items-start gap-4 p-6">
         <ShieldX className="size-10 text-muted-foreground" aria-hidden />
         <Button asChild variant="outline">
-          <Link to="/">Back to Dashboard</Link>
+          <Link to={ROUTES.home}>Back to Dashboard</Link>
         </Button>
       </div>
     </>
@@ -60,13 +61,13 @@ export function GuestRoute() {
 // Only paths inside this app: "/rides" is fine, "//evil.com" (another website) is not.
 function redirectTarget(state: unknown, roles: Role[]): string {
   const from = (state as { from?: { pathname?: unknown; search?: unknown; hash?: unknown } } | null)?.from
-  if (typeof from?.pathname !== 'string') return '/'
-  if (!from.pathname.startsWith('/') || from.pathname.startsWith('//')) return '/'
+  if (typeof from?.pathname !== 'string') return ROUTES.home
+  if (!from.pathname.startsWith('/') || from.pathname.startsWith('//')) return ROUTES.home
 
   // Another role's page (/rider/…, /admin/…) was remembered from someone else's session: the dashboard instead.
   const path = from.pathname
   const pageRole = roleSchema.options.find((role) => path.startsWith(`/${role.toLowerCase()}/`))
-  if (pageRole && !roles.includes(pageRole)) return '/'
+  if (pageRole && !roles.includes(pageRole)) return ROUTES.home
 
   const search = typeof from.search === 'string' ? from.search : ''
   const hash = typeof from.hash === 'string' ? from.hash : ''

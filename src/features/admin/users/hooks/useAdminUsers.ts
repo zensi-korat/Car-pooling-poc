@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { listUsers } from '../api/usersApi'
 import type { ListUsersParams } from '../api/usersSchema'
 
@@ -6,7 +7,7 @@ import type { ListUsersParams } from '../api/usersSchema'
 // The params are part of the key, so page 2 is cached separately from page 1.
 export function useAdminUsers(params: ListUsersParams) {
   return useQuery({
-    queryKey: ['admin', 'users', params],
+    queryKey: QUERY_KEYS.admin.users(params),
     queryFn: ({ signal }) => listUsers(params, signal),
     // While the next page loads, keep showing the current one instead of an empty table.
     placeholderData: keepPreviousData,

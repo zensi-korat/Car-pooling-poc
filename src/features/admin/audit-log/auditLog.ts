@@ -1,5 +1,5 @@
 import { readDateRange } from '@/lib/filters'
-import { auditEntityTypeSchema, type AuditLogFilters } from '../api/auditLogSchema'
+import { auditEntityTypeSchema, type AuditLogFilters } from './api/auditLogSchema'
 
 export const AUDIT_ENTITY_TYPES = auditEntityTypeSchema.options
 // Actions seen in the API docs' examples and real responses. The server has no full list yet (asked the backend).

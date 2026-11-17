@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { searchPlaces } from '../api/placesApi'
 
@@ -9,7 +10,7 @@ export function usePlaceSuggestions(text: string) {
   const query = useDebouncedValue(text.trim())
 
   return useQuery({
-    queryKey: ['places', query],
+    queryKey: QUERY_KEYS.places(query),
     queryFn: ({ signal }) => searchPlaces(query, signal),
     enabled: query.length >= MIN_SEARCH_LENGTH,
     placeholderData: keepPreviousData,

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
+import { ROUTES } from '@/constants/routes'
 import { SignupForm } from '@/features/auth/components/SignupForm'
 import type { SignupValues } from '@/features/auth/api/authSchema'
 import { useAuth } from '@/features/auth/useAuth'
@@ -43,7 +44,7 @@ export function SignupPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link to={ROUTES.login} className="font-medium text-foreground underline-offset-4 hover:underline">
               Log in
             </Link>
           </p>

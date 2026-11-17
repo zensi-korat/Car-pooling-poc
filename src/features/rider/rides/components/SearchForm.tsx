@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PlaceInput } from '@/features/shared/places/components/PlaceInput'
 import { searchFormSchema, type SearchFormValues, type SearchRidesParams } from '../api/ridesSchema'
-import { toSearchParams } from '../lib/search'
+import { toSearchParams } from '../rides'
 
 const EMPTY_SEARCH: SearchFormValues = { origin: null, destination: null, dates: {} }
 

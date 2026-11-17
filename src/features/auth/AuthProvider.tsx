@@ -9,6 +9,7 @@ import {
   updateName as updateNameRequest,
   verifyPhone as verifyPhoneRequest,
 } from './api/authApi'
+import { ROUTES } from '@/constants/routes'
 import { setSessionExpiredHandler } from '@/services/api'
 import type { LoginValues, SignupValues } from './api/authSchema'
 import { AuthContext, type AuthState } from './useAuth'
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const logout = useCallback(async () => {
     await logoutRequest().catch(() => undefined)
     endSession()
-    navigate('/login', { replace: true })
+    navigate(ROUTES.login, { replace: true })
   }, [endSession, navigate])
 
   // Same object until something changes, so useAuth() users don't re-render for nothing.

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Ban, CalendarClock, Car, CircleCheck, Pencil, Route, Users, type LucideIcon } from 'lucide-react'
-import { Link } from 'react-router'
+import { generatePath, Link } from 'react-router'
 import { RideStatusBadge } from '@/components/badges'
 import { InfoTile, RouteLine } from '@/components/page'
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,10 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ROUTES } from '@/constants/routes'
 import type { Ride, RideStatus } from '@/features/shared/rides/api/rideSchema'
 import { formatDateTime, formatFare } from '@/lib/format'
-import { getRideActions, ridesForTab } from '../lib/rides'
+import { getRideActions, ridesForTab } from '../rides'
 import { CancelRideButton, CompleteRideButton } from './RideActions'
 import { RideBookingsSheet } from './RideBookingsSheet'
 
@@ -176,7 +177,7 @@ function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
         <RideBookingsSheet ride={ride} canCancelBookings={canCancel} />
         {canEdit && (
           <Button variant="outline" size="sm" asChild>
-            <Link to={`/driver/rides/${ride.id}/edit`}>
+            <Link to={generatePath(ROUTES.driver.editRide, { id: ride.id })}>
               <Pencil data-icon="inline-start" />
               Edit
             </Link>

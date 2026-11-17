@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Switch } from '@/components/ui/switch'
 import { env } from '@/config/env'
+import { ROUTES } from '@/constants/routes'
 import type { Role } from '@/features/auth/api/authSchema'
 import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
 import { useTheme } from '@/hooks/useTheme'
@@ -55,17 +56,17 @@ import { initials } from '@/lib/text'
 type NavItem = { to: string; label: string; Icon: LucideIcon; role?: Role }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Dashboard', Icon: LayoutDashboard },
-  { to: '/profile', label: 'My Profile', Icon: UserRound },
-  { to: '/driver/vehicles', label: 'My Vehicles', Icon: CarFront, role: 'DRIVER' },
-  { to: '/driver/rides', label: 'My Rides', Icon: Route, role: 'DRIVER' },
-  { to: '/driver/rides/new', label: 'Post a Ride', Icon: CirclePlus, role: 'DRIVER' },
-  { to: '/rider/search', label: 'Find a Ride', Icon: Search, role: 'RIDER' },
-  { to: '/rider/bookings', label: 'My Bookings', Icon: Ticket, role: 'RIDER' },
-  { to: '/admin/users', label: 'Users', Icon: Users, role: 'ADMIN' },
-  { to: '/admin/rides', label: 'Rides', Icon: Car, role: 'ADMIN' },
-  { to: '/admin/vehicles', label: 'Vehicles', Icon: ClipboardCheck, role: 'ADMIN' },
-  { to: '/admin/audit-logs', label: 'Audit log', Icon: History, role: 'ADMIN' },
+  { to: ROUTES.home, label: 'Dashboard', Icon: LayoutDashboard },
+  { to: ROUTES.profile, label: 'My Profile', Icon: UserRound },
+  { to: ROUTES.driver.vehicles, label: 'My Vehicles', Icon: CarFront, role: 'DRIVER' },
+  { to: ROUTES.driver.rides, label: 'My Rides', Icon: Route, role: 'DRIVER' },
+  { to: ROUTES.driver.newRide, label: 'Post a Ride', Icon: CirclePlus, role: 'DRIVER' },
+  { to: ROUTES.rider.search, label: 'Find a Ride', Icon: Search, role: 'RIDER' },
+  { to: ROUTES.rider.bookings, label: 'My Bookings', Icon: Ticket, role: 'RIDER' },
+  { to: ROUTES.admin.users, label: 'Users', Icon: Users, role: 'ADMIN' },
+  { to: ROUTES.admin.rides, label: 'Rides', Icon: Car, role: 'ADMIN' },
+  { to: ROUTES.admin.vehicles, label: 'Vehicles', Icon: ClipboardCheck, role: 'ADMIN' },
+  { to: ROUTES.admin.auditLogs, label: 'Audit log', Icon: History, role: 'ADMIN' },
 ]
 
 export function DashboardLayout() {
@@ -101,7 +102,7 @@ function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip={env.appName}>
-              <Link to="/">
+              <Link to={ROUTES.home}>
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <CarFront className="size-4" />
                 </div>
@@ -182,7 +183,7 @@ function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/profile">
+              <Link to={ROUTES.profile}>
                 <UserRound />
                 My Profile
               </Link>

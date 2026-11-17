@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import type { VehicleDocumentType } from '@/features/shared/vehicles/api/vehicleSchema'
-import { getDocumentUrl } from '../api/vehiclesApi'
+import { getDocumentUrl } from '@/features/shared/vehicles/api/vehiclesApi'
 
 // A fresh signed link on every click (it expires after 60 s). The server marks it as a download,
 // so opening it saves the file and the page stays where it is.

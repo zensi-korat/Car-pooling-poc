@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { hasFilters } from '@/lib/filters'
-import { RIDE_STATUSES } from '../lib/filters'
+import { RIDE_STATUSES } from '../rides'
 import type { RideFilters } from '../api/ridesSchema'
 
 const ALL_STATUSES = 'ALL'
