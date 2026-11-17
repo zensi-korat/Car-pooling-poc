@@ -1,7 +1,7 @@
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { humanize } from '@/lib/text'
-import { VEHICLE_STATUSES } from '../lib/filters'
+import { VEHICLE_STATUSES } from '../vehicles'
 import type { VehicleFilters } from '../api/vehiclesSchema'
 
 type VehiclesFiltersProps = Readonly<{

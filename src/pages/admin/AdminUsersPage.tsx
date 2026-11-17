@@ -4,7 +4,7 @@ import { UsersFilters } from '@/features/admin/users/components/UsersFilters'
 import { UsersTable } from '@/features/admin/users/components/UsersTable'
 import { useAdminUsers } from '@/features/admin/users/hooks/useAdminUsers'
 import { hasFilters } from '@/lib/filters'
-import { readUserFilters } from '@/features/admin/users/lib/filters'
+import { readUserFilters } from '@/features/admin/users/users'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useListParams } from '@/hooks/useListParams'
 

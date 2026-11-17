@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { humanize } from '@/lib/text'
 import { hasFilters } from '@/lib/filters'
-import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '../lib/filters'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '../auditLog'
 import type { AuditLogFilters } from '../api/auditLogSchema'
 
 const ALL = 'ALL'

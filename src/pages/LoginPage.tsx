@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
+import { ROUTES } from '@/constants/routes'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import type { LoginValues } from '@/features/auth/api/authSchema'
 import { useAuth } from '@/features/auth/useAuth'
@@ -43,7 +44,7 @@ export function LoginPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             New to {env.appName}?{' '}
-            <Link to="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link to={ROUTES.signup} className="font-medium text-foreground underline-offset-4 hover:underline">
               Create an account
             </Link>
           </p>

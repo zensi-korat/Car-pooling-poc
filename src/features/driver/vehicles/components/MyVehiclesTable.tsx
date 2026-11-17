@@ -1,7 +1,8 @@
-import { VehicleDocumentBadges, VehicleStatusBadge } from '@/components/badges'
+import { VehicleStatusBadge } from '@/components/badges'
 import { ListTable, TwoLines } from '@/components/page'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
+import { VehicleDocuments } from '@/features/shared/vehicles/components/VehicleDocuments'
 import { VehicleDocumentsDialog } from './VehicleDocumentsDialog'
 import { VehicleFormDialog } from './VehicleFormDialog'
 
@@ -27,7 +28,7 @@ export function MyVehiclesTable({ vehicles }: Readonly<{ vehicles: Vehicle[] | u
           </TableCell>
           <TableCell className="px-4 text-muted-foreground">{vehicle.seatCapacity}</TableCell>
           <TableCell className="px-4">
-            <VehicleDocumentBadges documents={vehicle.documents} />
+            <VehicleDocuments vehicle={vehicle} />
           </TableCell>
           <TableCell className="px-4 text-muted-foreground">
             {addedFormat.format(new Date(vehicle.createdAt))}

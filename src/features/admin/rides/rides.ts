@@ -1,6 +1,6 @@
 import { readDateRange, readSearch } from '@/lib/filters'
 import { rideStatusSchema } from '@/features/shared/rides/api/rideSchema'
-import type { RideFilters } from '../api/ridesSchema'
+import type { RideFilters } from './api/ridesSchema'
 
 export const RIDE_STATUSES = rideStatusSchema.options
 

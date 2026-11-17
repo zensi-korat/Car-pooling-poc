@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
-import { VehicleDocumentBadges, VehicleStatusBadge } from '@/components/badges'
+import { VehicleStatusBadge } from '@/components/badges'
 import { ListTable, TwoLines } from '@/components/page'
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { useCurrentUser } from '@/features/auth/useAuth'
 import { vehicleDocumentTypeSchema } from '@/features/shared/vehicles/api/vehicleSchema'
+import { VehicleDocuments } from '@/features/shared/vehicles/components/VehicleDocuments'
 import type { AdminVehicle } from '../api/vehiclesSchema'
 import type { Review } from './ReviewVehicleDialog'
 
@@ -58,7 +59,7 @@ function VehicleRow({ vehicle, isOwn, onReview }: VehicleRowProps) {
       </TableCell>
       <TableCell className="px-4 text-muted-foreground">{vehicle.seatCapacity}</TableCell>
       <TableCell className="px-4">
-        <VehicleDocumentBadges documents={vehicle.documents} />
+        <VehicleDocuments vehicle={vehicle} />
       </TableCell>
       <TableCell className="px-4 text-muted-foreground">
         {submittedFormat.format(new Date(vehicle.createdAt))}

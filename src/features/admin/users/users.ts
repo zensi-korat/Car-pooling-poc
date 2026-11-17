@@ -1,6 +1,6 @@
 import { readDateRange, readSearch } from '@/lib/filters'
 import { roleSchema } from '@/features/auth/api/authSchema'
-import type { UserFilters } from '../api/usersSchema'
+import type { UserFilters } from './api/usersSchema'
 
 export const ROLES = roleSchema.options
 

@@ -1,5 +1,5 @@
 import { vehicleStatusSchema } from '@/features/shared/vehicles/api/vehicleSchema'
-import type { VehicleFilters } from '../api/vehiclesSchema'
+import type { VehicleFilters } from './api/vehiclesSchema'
 
 export const VEHICLE_STATUSES = vehicleStatusSchema.options
 

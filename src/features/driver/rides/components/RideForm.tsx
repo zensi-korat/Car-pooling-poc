@@ -10,13 +10,14 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ROUTES } from '@/constants/routes'
 import { PlaceInput } from '@/features/shared/places/components/PlaceInput'
 import type { Ride } from '@/features/shared/rides/api/rideSchema'
 import type { Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
 import { rideFormSchema, type RideFormValues } from '../api/ridesSchema'
 import { useCreateRide } from '../hooks/useCreateRide'
 import { useUpdateRide } from '../hooks/useUpdateRide'
-import { toRideBody, toRideFormValues } from '../lib/rides'
+import { toRideBody, toRideFormValues } from '../rides'
 
 const EMPTY_RIDE: RideFormValues = {
   origin: null,
@@ -37,7 +38,7 @@ export function RideForm({ vehicles, ride }: RideFormProps) {
 
   function done(message: string) {
     toast.success(message)
-    navigate('/driver/rides')
+    navigate(ROUTES.driver.rides)
   }
 
   const form = useForm({
@@ -165,7 +166,7 @@ export function RideForm({ vehicles, ride }: RideFormProps) {
 
         <CardFooter className="justify-end gap-2">
           <Button variant="outline" asChild>
-            <Link to="/driver/rides">Cancel</Link>
+            <Link to={ROUTES.driver.rides}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSaving}>
             {isSaving && <Loader2 data-icon="inline-start" className="animate-spin" />}
@@ -191,7 +192,7 @@ export function NoApprovedVehicle() {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link to="/driver/vehicles">Go to My Vehicles</Link>
+          <Link to={ROUTES.driver.vehicles}>Go to My Vehicles</Link>
         </Button>
       </EmptyContent>
     </Empty>
@@ -210,7 +211,7 @@ export function RideNotFound() {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link to="/driver/rides">Back to My Rides</Link>
+          <Link to={ROUTES.driver.rides}>Back to My Rides</Link>
         </Button>
       </EmptyContent>
     </Empty>

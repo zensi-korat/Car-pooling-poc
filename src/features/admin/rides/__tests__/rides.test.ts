@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readRideFilters } from '../filters'
+import { readRideFilters } from '../rides'
 
 describe('readRideFilters', () => {
   const readRides = (query: string) => readRideFilters(new URLSearchParams(query))

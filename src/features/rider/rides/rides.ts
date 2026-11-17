@@ -1,5 +1,5 @@
 import { fromDateText } from '@/lib/dates'
-import type { SearchFormValues, SearchRidesParams } from '../api/ridesSchema'
+import type { SearchFormValues, SearchRidesParams } from './api/ridesSchema'
 
 // Form values → search params. Call it only after the form passed searchFormSchema.
 // The day range becomes a time window: the first day's start to the last day's end (the browser's clock).

@@ -4,7 +4,7 @@ import { AuditLogsFilters } from '@/features/admin/audit-log/components/AuditLog
 import { AuditLogsTable } from '@/features/admin/audit-log/components/AuditLogsTable'
 import { useAdminAuditLogs } from '@/features/admin/audit-log/hooks/useAdminAuditLogs'
 import { hasFilters } from '@/lib/filters'
-import { readAuditLogFilters } from '@/features/admin/audit-log/lib/filters'
+import { readAuditLogFilters } from '@/features/admin/audit-log/auditLog'
 import { useListParams } from '@/hooks/useListParams'
 
 export function AdminAuditLogsPage() {

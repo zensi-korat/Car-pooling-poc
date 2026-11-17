@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { hasFilters } from '@/lib/filters'
-import { ROLES } from '../lib/filters'
+import { ROLES } from '../users'
 import type { UserFilters } from '../api/usersSchema'
 
 const ALL_ROLES = 'ALL'

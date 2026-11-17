@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/constants/routes'
 
 export function NotFoundPage() {
   return (
@@ -14,7 +15,7 @@ export function NotFoundPage() {
           <p className="text-sm text-muted-foreground">This page doesn't exist or has moved.</p>
         </div>
         <Button asChild>
-          <Link to="/">Go home</Link>
+          <Link to={ROUTES.home}>Go home</Link>
         </Button>
       </main>
     </div>

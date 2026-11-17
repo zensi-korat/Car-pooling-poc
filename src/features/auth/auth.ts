@@ -3,7 +3,7 @@
 // The server still checks everything again; its messages show under the fields too.
 
 import { fieldErrors } from '@/lib/validation'
-import { loginSchema, signupSchema, type LoginValues, type SignupValues } from '../api/authSchema'
+import { loginSchema, signupSchema, type LoginValues, type SignupValues } from './api/authSchema'
 
 // One optional message per field, e.g. { email: 'Email is required' }.
 export type LoginErrors = Partial<Record<keyof LoginValues, string>>

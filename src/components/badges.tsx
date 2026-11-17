@@ -3,12 +3,7 @@ import { BadgeCheck, Check, Clock, X } from 'lucide-react'
 import type { Role } from '@/features/auth/api/authSchema'
 import type { BookingStatus } from '@/features/shared/bookings/api/bookingSchema'
 import type { RideStatus } from '@/features/shared/rides/api/rideSchema'
-import {
-  vehicleDocumentTypeSchema,
-  type Vehicle,
-  type VehicleDocumentType,
-  type VehicleStatus,
-} from '@/features/shared/vehicles/api/vehicleSchema'
+import type { VehicleDocumentType, VehicleStatus } from '@/features/shared/vehicles/api/vehicleSchema'
 import { humanize } from '@/lib/text'
 
 const TONES = {
@@ -71,22 +66,16 @@ const DOCUMENT_LABELS: Record<VehicleDocumentType, string> = {
   LICENCE: 'Licence',
 }
 
-// One badge per required document: green tick if uploaded, red cross if not.
-export function VehicleDocumentBadges({ documents }: Readonly<{ documents: Vehicle['documents'] }>) {
-  return (
-    <span className="flex gap-1">
-      {vehicleDocumentTypeSchema.options.map((type) =>
-        documents.some((document) => document.type === type) ? (
-          <StatusBadge key={type} tone="green">
-            <Check /> {DOCUMENT_LABELS[type]}
-          </StatusBadge>
-        ) : (
-          <StatusBadge key={type} tone="red">
-            <X /> {DOCUMENT_LABELS[type]}
-          </StatusBadge>
-        ),
-      )}
-    </span>
+// A required document: green tick if uploaded, red cross if not.
+export function VehicleDocumentBadge({ type, uploaded }: Readonly<{ type: VehicleDocumentType; uploaded: boolean }>) {
+  return uploaded ? (
+    <StatusBadge tone="green">
+      <Check /> {DOCUMENT_LABELS[type]}
+    </StatusBadge>
+  ) : (
+    <StatusBadge tone="red">
+      <X /> {DOCUMENT_LABELS[type]}
+    </StatusBadge>
   )
 }
 

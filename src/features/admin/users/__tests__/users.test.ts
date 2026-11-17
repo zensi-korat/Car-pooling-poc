@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readUserFilters } from '../filters'
+import { readUserFilters } from '../users'
 
 const read = (query: string) => readUserFilters(new URLSearchParams(query))
 

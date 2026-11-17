@@ -5,6 +5,7 @@ import { InfoTile, RouteLine } from '@/components/page'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ROUTES } from '@/constants/routes'
 import type { Ride } from '@/features/shared/rides/api/rideSchema'
 import { formatDateTime, formatFare } from '@/lib/format'
 import { useBookSeat } from '../hooks/useBookSeat'
@@ -125,7 +126,7 @@ function BookSeatButton({ ride }: Readonly<{ ride: Ride }>) {
         bookSeat.mutate(ride.id, {
           onSuccess: () => {
             close('Seat booked')
-            navigate('/rider/bookings')
+            navigate(ROUTES.rider.bookings)
           },
         })
       }

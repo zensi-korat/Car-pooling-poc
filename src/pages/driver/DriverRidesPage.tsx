@@ -3,9 +3,10 @@ import { Link } from 'react-router'
 import { FormAlert } from '@/components/form'
 import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/constants/routes'
 import { MyRidesList } from '@/features/driver/rides/components/MyRidesList'
 import { useMyRides } from '@/features/driver/rides/hooks/useMyRides'
-import { DEFAULT_TAB, readMyRideFilters } from '@/features/driver/rides/lib/filters'
+import { DEFAULT_TAB, readMyRideFilters } from '@/features/driver/rides/rides'
 import { useListParams } from '@/hooks/useListParams'
 
 export function DriverRidesPage() {
@@ -16,7 +17,7 @@ export function DriverRidesPage() {
     <>
       <PageHeader title="My Rides" description="Your posted rides, who booked them, and what's next.">
         <Button asChild>
-          <Link to="/driver/rides/new">
+          <Link to={ROUTES.driver.newRide}>
             <Plus data-icon="inline-start" />
             Post a ride
           </Link>

@@ -18,13 +18,9 @@ import {
   type Vehicle,
   type VehicleDocumentType,
 } from '@/features/shared/vehicles/api/vehicleSchema'
+import { DOCUMENT_NAMES } from '@/features/shared/vehicles/vehicles'
 import { useDownloadDocument } from '../hooks/useDownloadDocument'
 import { useUploadDocument } from '../hooks/useUploadDocument'
-
-const LABELS: Record<VehicleDocumentType, string> = {
-  RC: 'RC (registration certificate)',
-  LICENCE: 'Driving licence',
-}
 
 const uploadedFormat = new Intl.DateTimeFormat('en-IN', {
   day: 'numeric',
@@ -82,14 +78,14 @@ function DocumentRow({ vehicleId, type, uploadedAt }: DocumentRowProps) {
     // Clear the picker, so choosing the same file again still triggers onChange.
     event.target.value = ''
     if (!file) return
-    upload.mutate({ id: vehicleId, type, file }, { onSuccess: () => toast.success(`${LABELS[type]} uploaded`) })
+    upload.mutate({ id: vehicleId, type, file }, { onSuccess: () => toast.success(`${DOCUMENT_NAMES[type]} uploaded`) })
   }
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <span className="text-sm font-medium">{LABELS[type]}</span>
+          <span className="text-sm font-medium">{DOCUMENT_NAMES[type]}</span>
           {uploadedAt ? (
             <span className="flex items-center gap-2 text-xs text-muted-foreground">
               <StatusBadge tone="green">
@@ -109,7 +105,7 @@ function DocumentRow({ vehicleId, type, uploadedAt }: DocumentRowProps) {
             <Button
               variant="outline"
               size="icon-sm"
-              aria-label={`Download ${LABELS[type]}`}
+              aria-label={`Download ${DOCUMENT_NAMES[type]}`}
               title="Download"
               onClick={() => download.mutate({ id: vehicleId, type })}
               disabled={download.isPending}

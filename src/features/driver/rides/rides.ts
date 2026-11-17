@@ -1,7 +1,7 @@
-import type { Ride, RideStatus } from '@/features/shared/rides/api/rideSchema'
+import { rideStatusSchema, type Ride, type RideStatus } from '@/features/shared/rides/api/rideSchema'
 import type { Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
 import { isBeforeDepartureDay, toDateTimeText } from '@/lib/dates'
-import type { RideBody, RideFormValues } from '../api/ridesSchema'
+import type { RideBody, RideFormValues } from './api/ridesSchema'
 
 type RideActions = { canEdit: boolean; canCancel: boolean; canComplete: boolean }
 
@@ -53,4 +53,11 @@ export function toRideBody(values: RideFormValues): RideBody {
     estimatedCost: Number(values.estimatedCost).toFixed(2),
     vehicleId: values.vehicleId,
   }
+}
+
+export const DEFAULT_TAB: RideStatus = 'SCHEDULED'
+
+// ?status=COMPLETED → that tab. The default tab stays out of the URL; anything unknown is ignored.
+export function readMyRideFilters(params: URLSearchParams): { status?: RideStatus } {
+  return { status: rideStatusSchema.options.find((s) => s === params.get('status') && s !== DEFAULT_TAB) }
 }

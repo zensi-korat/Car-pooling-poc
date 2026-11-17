@@ -5,7 +5,7 @@ import { ReviewVehicleDialog, type Review } from '@/features/admin/vehicles/comp
 import { VehiclesFilters } from '@/features/admin/vehicles/components/VehiclesFilters'
 import { VehiclesTable } from '@/features/admin/vehicles/components/VehiclesTable'
 import { useAdminVehicles } from '@/features/admin/vehicles/hooks/useAdminVehicles'
-import { readVehicleFilters } from '@/features/admin/vehicles/lib/filters'
+import { readVehicleFilters } from '@/features/admin/vehicles/vehicles'
 import type { VehicleStatus } from '@/features/shared/vehicles/api/vehicleSchema'
 import { useListParams } from '@/hooks/useListParams'
 

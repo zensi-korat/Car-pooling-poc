@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 import { reviewVehicle } from '../api/vehiclesApi'
 import type { ReviewVehicleBody } from '../api/vehiclesSchema'
 
@@ -9,6 +10,6 @@ export function useReviewVehicle() {
 
   return useMutation({
     mutationFn: ({ id, ...body }: ReviewVehicleBody & { id: string }) => reviewVehicle(id, body),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin'] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.admin.all }),
   })
 }

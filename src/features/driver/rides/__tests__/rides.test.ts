@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Ride } from '@/features/shared/rides/api/rideSchema'
 import type { Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
 import { toDateTimeText } from '@/lib/dates'
-import { getRideActions, ridesForTab, toRideBody, toRideFormValues } from '../rides'
+import { getRideActions, readMyRideFilters, ridesForTab, toRideBody, toRideFormValues } from '../rides'
 
 function ride(overrides: Partial<Ride>): Ride {
   return {
@@ -141,5 +141,19 @@ describe('toRideFormValues', () => {
     const body = toRideBody(toRideFormValues(withSwift, [swift]))
     expect(body.departureTime).toBe('2026-11-20T04:00:00.000Z')
     expect([body.originLat, body.destLng, body.estimatedCost]).toEqual([23.02, 72.87, '1200.00'])
+  })
+})
+
+const read = (query: string) => readMyRideFilters(new URLSearchParams(query))
+
+describe('readMyRideFilters', () => {
+  it('reads a known tab', () => {
+    expect(read('status=CANCELLED')).toEqual({ status: 'CANCELLED' })
+  })
+
+  it('ignores the default tab and unknown values', () => {
+    expect(read('status=SCHEDULED')).toEqual({ status: undefined })
+    expect(read('status=nope')).toEqual({ status: undefined })
+    expect(read('')).toEqual({ status: undefined })
   })
 })
