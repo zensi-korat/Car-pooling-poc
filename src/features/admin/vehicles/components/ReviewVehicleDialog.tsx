@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { revalidateLogic, useForm } from '@tanstack/react-form'
 import { Loader2 } from 'lucide-react'
-import { FormAlert } from '@/components/form'
+import { FormAlert, LabeledField } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,14 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { REVIEW_NOTE_MAX, rejectFormSchema, type AdminVehicle, type ReviewVehicleBody } from '../api/vehiclesSchema'
 import { useReviewVehicle } from '../hooks/useReviewVehicle'
-import type { AdminVehicle, ReviewVehicleBody } from '../api/vehiclesSchema'
 
 export type Review = { vehicle: AdminVehicle; decision: ReviewVehicleBody['decision'] }
-
-const NOTE_MAX = 500
 
 type ReviewVehicleDialogProps = Readonly<{
   review: Review | null
@@ -26,36 +23,45 @@ type ReviewVehicleDialogProps = Readonly<{
 
 export function ReviewVehicleDialog({ review, onClose }: ReviewVehicleDialogProps) {
   const reviewVehicle = useReviewVehicle()
-  const [note, setNote] = useState('')
-
   const isReject = review?.decision === 'REJECTED'
-  const canSubmit = !reviewVehicle.isPending && (!isReject || note.trim() !== '')
+
+  const form = useForm({
+    defaultValues: { note: '' },
+    validationLogic: revalidateLogic(),
+    // Only a rejection needs a note.
+    validators: { onDynamic: isReject ? rejectFormSchema : undefined },
+    onSubmit: ({ value }) => {
+      if (!review) return
+      reviewVehicle.mutate(
+        {
+          id: review.vehicle.id,
+          decision: review.decision,
+          reviewVersion: review.vehicle.reviewVersion,
+          note: isReject ? rejectFormSchema.parse(value).note : undefined,
+        },
+        { onSuccess: close },
+      )
+    },
+  })
 
   function close() {
-    setNote('')
+    form.reset()
     reviewVehicle.reset()
     onClose()
-  }
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    if (!review || !canSubmit) return
-    reviewVehicle.mutate(
-      {
-        id: review.vehicle.id,
-        decision: review.decision,
-        reviewVersion: review.vehicle.reviewVersion,
-        note: isReject ? note.trim() : undefined,
-      },
-      { onSuccess: close },
-    )
   }
 
   return (
     <Dialog open={review !== null} onOpenChange={(open) => !open && !reviewVehicle.isPending && close()}>
       <DialogContent>
         {review && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form
+            noValidate
+            className="flex flex-col gap-4"
+            onSubmit={(event) => {
+              event.preventDefault()
+              void form.handleSubmit()
+            }}
+          >
             <DialogHeader>
               <DialogTitle>
                 {isReject ? 'Reject' : 'Approve'} {review.vehicle.make} {review.vehicle.model}?
@@ -66,22 +72,29 @@ export function ReviewVehicleDialog({ review, onClose }: ReviewVehicleDialogProp
             </DialogHeader>
 
             {isReject && (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="review-note">Reason for rejecting</Label>
-                <Textarea
-                  className="break-all resize-none"
-                  id="review-note"
-                  placeholder="e.g. The RC photo is blurry. Please upload a clearer one."
-                  maxLength={NOTE_MAX}
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  disabled={reviewVehicle.isPending}
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                  The owner sees this. {note.length}/{NOTE_MAX}
-                </p>
-              </div>
+              <form.Field name="note">
+                {(field) => (
+                  <LabeledField
+                    name={field.name}
+                    label="Reason for rejecting"
+                    description={`The owner sees this. ${field.state.value.length}/${REVIEW_NOTE_MAX}`}
+                    errors={field.state.meta.errors}
+                  >
+                    <Textarea
+                      id={field.name}
+                      className="break-all resize-none"
+                      placeholder="e.g. The RC photo is blurry. Please upload a clearer one."
+                      maxLength={REVIEW_NOTE_MAX}
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      onBlur={field.handleBlur}
+                      disabled={reviewVehicle.isPending}
+                      aria-invalid={!field.state.meta.isValid}
+                      autoFocus
+                    />
+                  </LabeledField>
+                )}
+              </form.Field>
             )}
 
             {reviewVehicle.isError && <FormAlert>{reviewVehicle.error.message}</FormAlert>}
@@ -90,7 +103,7 @@ export function ReviewVehicleDialog({ review, onClose }: ReviewVehicleDialogProp
               <Button type="button" variant="outline" onClick={close} disabled={reviewVehicle.isPending}>
                 Cancel
               </Button>
-              <Button type="submit" variant={isReject ? 'destructive' : 'default'} disabled={!canSubmit}>
+              <Button type="submit" variant={isReject ? 'destructive' : 'default'} disabled={reviewVehicle.isPending}>
                 {reviewVehicle.isPending && <Loader2 data-icon="inline-start" className="animate-spin" />}
                 {isReject ? 'Reject' : 'Approve'}
               </Button>

@@ -33,9 +33,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/
 const MOBILE_PATTERN = /^[6-9]\d{9}$/
 export const MIN_PASSWORD_LENGTH = 8
 
-// Shared by login and signup, so the email rule lives in one place.
+// Shared by login and signup, so the email rule lives in one place. trim(): "  a@b.com " counts as "a@b.com".
 const emailSchema = z
   .string()
+  .trim()
   .min(1, 'Email is required')
   .regex(EMAIL_PATTERN, 'Enter a valid email, like name@example.com')
 
@@ -51,12 +52,16 @@ export type LoginValues = z.infer<typeof loginSchema>
 export const SIGNUP_ROLES = ['RIDER', 'DRIVER'] as const
 export type SignupRole = (typeof SIGNUP_ROLES)[number]
 
+// Shared by signup and the profile form.
+const nameSchema = z.string().trim().min(1, 'Name is required')
+
 // The body of POST /api/auth/signup.
 export const signupSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: nameSchema,
   email: emailSchema,
   phone: z
     .string()
+    .trim()
     .min(1, 'Phone number is required')
     .regex(MOBILE_PATTERN, 'Enter a 10-digit mobile number, like 9876543210'),
   password: z
@@ -66,3 +71,11 @@ export const signupSchema = z.object({
   role: z.enum(SIGNUP_ROLES, { error: 'Choose how you’ll use the app' }),
 })
 export type SignupValues = z.infer<typeof signupSchema>
+
+// The profile form: only the name can be changed.
+export const profileFormSchema = z.object({ name: nameSchema })
+
+// The verify-phone form: the 6-digit code from the SMS.
+export const verifyPhoneFormSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code from the SMS'),
+})

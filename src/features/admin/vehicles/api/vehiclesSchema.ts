@@ -24,3 +24,10 @@ export type ReviewVehicleBody = {
   reviewVersion: string // copied from the list: the server refuses (409) if the vehicle changed since
   note?: string
 }
+
+export const REVIEW_NOTE_MAX = 500
+
+// The reject form: the note the owner will read. Approving has no form fields.
+export const rejectFormSchema = z.object({
+  note: z.string().trim().min(1, 'Write why you are rejecting it').max(REVIEW_NOTE_MAX),
+})

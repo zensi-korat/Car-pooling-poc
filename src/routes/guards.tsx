@@ -1,24 +1,25 @@
 import { Loader2, ShieldX } from 'lucide-react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
+import { useShallow } from 'zustand/react/shallow'
 import { AppHeader } from '@/components/AppHeader'
 import { PageHeader } from '@/components/page'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/constants/routes'
 import { roleSchema, type Role } from '@/features/auth/api/authSchema'
-import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
+import { useAuthStore, useCurrentUser } from '@/features/auth/authStore'
 
 // Pages for logged-in users only. Logged out → /login, remembering where they wanted to go.
 // Unverified phone → /verify-phone first; already verified → no need to stay on /verify-phone.
 export function ProtectedRoute() {
-  const auth = useAuth()
+  const { status, user } = useSession()
   const location = useLocation()
 
-  if (auth.status === 'loading') return <SessionCheck />
-  if (auth.status === 'unauthenticated') return <Navigate to={ROUTES.login} replace state={{ from: location }} />
+  if (status === 'loading') return <SessionCheck />
+  if (!user) return <Navigate to={ROUTES.login} replace state={{ from: location }} />
 
   const onVerifyPage = location.pathname === ROUTES.verifyPhone
-  if (!auth.user.phoneVerified && !onVerifyPage) return <Navigate to={ROUTES.verifyPhone} replace />
-  if (auth.user.phoneVerified && onVerifyPage) return <Navigate to={ROUTES.home} replace />
+  if (!user.phoneVerified && !onVerifyPage) return <Navigate to={ROUTES.verifyPhone} replace />
+  if (user.phoneVerified && onVerifyPage) return <Navigate to={ROUTES.home} replace />
   return <Outlet />
 }
 
@@ -47,14 +48,17 @@ function NoAccess() {
 
 // Pages for logged-out users only (login, signup). Logged in → back to where they wanted to go.
 export function GuestRoute() {
-  const auth = useAuth()
+  const { status, user } = useSession()
   const location = useLocation()
 
-  if (auth.status === 'loading') return <SessionCheck />
-  if (auth.status === 'authenticated') {
-    return <Navigate to={redirectTarget(location.state, auth.user.roles)} replace />
-  }
+  if (status === 'loading') return <SessionCheck />
+  if (user) return <Navigate to={redirectTarget(location.state, user.roles)} replace />
   return <Outlet />
+}
+
+// Two values in one selector: useShallow compares the values inside, not the new object around them.
+function useSession() {
+  return useAuthStore(useShallow((state) => ({ status: state.status, user: state.user })))
 }
 
 // `state` is unknown (anything could be in it), so check it before trusting it.

@@ -48,7 +48,8 @@ http.interceptors.response.use(
 )
 
 // This file isn't React, so it can't change the auth state itself.
-// The AuthProvider registers a function here, and we call it when the session is over.
+// The auth store registers a function here, and we call it when the session is over.
+// (Importing the store here instead would be circular: the store calls the API.)
 let onSessionExpired: (() => void) | null = null
 
 export function setSessionExpiredHandler(handler: (() => void) | null) {

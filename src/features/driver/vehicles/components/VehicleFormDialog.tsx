@@ -1,7 +1,8 @@
-import { useState, type SubmitEvent } from 'react'
+import { useRef, useState } from 'react'
+import { revalidateLogic, useForm } from '@tanstack/react-form'
 import { Loader2, Pencil, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { FormAlert, FormField, TextField } from '@/components/form'
+import { FormAlert, LabeledField } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,9 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Vehicle } from '@/features/shared/vehicles/api/vehicleSchema'
-import { fieldErrors, isValid } from '@/lib/validation'
 import {
   SEAT_OPTIONS,
   vehicleFormSchema,
@@ -32,61 +33,48 @@ export function VehicleFormDialog({ vehicle }: VehicleFormDialogProps) {
   const createVehicle = useCreateVehicle()
   const updateVehicle = useUpdateVehicle()
   const save = vehicle ? updateVehicle : createVehicle
-
-  const [open, setOpen] = useState(false)
-  const [values, setValues] = useState(() => startValues(vehicle))
-  const [submitted, setSubmitted] = useState(false)
-
-  const errors = submitted ? fieldErrors(vehicleFormSchema, values) : {}
   const isSaving = save.isPending
 
-  function update(field: keyof VehicleFormValues, value: string) {
-    setValues((prev) => ({ ...prev, [field]: value }))
+  const [open, setOpen] = useState(false)
+
+  function saved(message: string) {
+    setOpen(false)
+    toast.success(message)
   }
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const form = useForm({
+    defaultValues: startValues(vehicle),
+    validationLogic: revalidateLogic(),
+    validators: { onDynamic: vehicleFormSchema },
+    onSubmit: ({ value }) => {
+      const body = toBody(value)
+      const name = `${body.make} ${body.model}`
+
+      if (!vehicle) {
+        createVehicle.mutate(body, { onSuccess: () => saved(`${name} added`) })
+        return
+      }
+
+      const changes = changedFields(vehicle, body)
+      if (Object.keys(changes).length === 0) {
+        setOpen(false)
+        return
+      }
+      updateVehicle.mutate({ id: vehicle.id, body: changes }, { onSuccess: () => saved(`${name} updated`) })
+    },
+    onSubmitInvalid: () =>
+      requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()),
+  })
 
   // Fill the form fresh on every open, so an edit always starts from the latest saved vehicle.
   function changeOpen(next: boolean) {
     if (isSaving) return
     if (next) {
-      setValues(startValues(vehicle))
-      setSubmitted(false)
+      form.reset(startValues(vehicle))
       save.reset()
     }
     setOpen(next)
-  }
-
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSubmitted(true)
-    if (!isValid(fieldErrors(vehicleFormSchema, values))) return
-
-    const body = toBody(values)
-    const name = `${body.make} ${body.model}`
-
-    if (!vehicle) {
-      createVehicle.mutate(body, {
-        onSuccess: () => {
-          setOpen(false)
-          toast.success(`${name} added`)
-        },
-      })
-      return
-    }
-
-    const changes = changedFields(vehicle, body)
-    if (Object.keys(changes).length === 0) {
-      setOpen(false)
-      return
-    }
-    updateVehicle.mutate(
-      { id: vehicle.id, body: changes },
-      {
-        onSuccess: () => {
-          setOpen(false)
-          toast.success(`${name} updated`)
-        },
-      },
-    )
   }
 
   return (
@@ -105,7 +93,15 @@ export function VehicleFormDialog({ vehicle }: VehicleFormDialogProps) {
       </DialogTrigger>
 
       <DialogContent>
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <form
+          ref={formRef}
+          noValidate
+          className="flex flex-col gap-5"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>{vehicle ? 'Edit vehicle' : 'Add a vehicle'}</DialogTitle>
             <DialogDescription>{description(vehicle)}</DialogDescription>
@@ -114,71 +110,92 @@ export function VehicleFormDialog({ vehicle }: VehicleFormDialogProps) {
           {save.isError && <FormAlert>{save.error.message}</FormAlert>}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <TextField
-              label="Make"
-              placeholder="Maruti"
-              value={values.make}
-              onChange={(e) => update('make', e.target.value)}
-              error={errors.make}
-              disabled={isSaving}
-              autoFocus
-            />
-            <TextField
-              label="Model"
-              placeholder="Swift"
-              value={values.model}
-              onChange={(e) => update('model', e.target.value)}
-              error={errors.model}
-              disabled={isSaving}
-            />
-            <TextField
-              label="Colour"
-              placeholder="White"
-              value={values.colour}
-              onChange={(e) => update('colour', e.target.value)}
-              error={errors.colour}
-              disabled={isSaving}
-            />
-            <FormField
-              id="vehicle-seats"
-              errorId="vehicle-seats-error"
-              label="Passenger seats"
-              error={errors.seatCapacity}
-            >
-              <Select
-                value={values.seatCapacity}
-                onValueChange={(value) => update('seatCapacity', value)}
-                disabled={isSaving}
-              >
-                <SelectTrigger
-                  id="vehicle-seats"
-                  className="w-full"
-                  aria-invalid={!!errors.seatCapacity}
-                  aria-describedby={errors.seatCapacity ? 'vehicle-seats-error' : undefined}
-                >
-                  <SelectValue placeholder="Choose" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {SEAT_OPTIONS.map((seats) => (
-                      <SelectItem key={seats} value={seats}>
-                        {seats}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </FormField>
+            <form.Field name="make">
+              {(field) => (
+                <LabeledField name={field.name} label="Make" errors={field.state.meta.errors}>
+                  <Input
+                    id={field.name}
+                    placeholder="Maruti"
+                    value={field.state.value}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isSaving}
+                    aria-invalid={!field.state.meta.isValid}
+                    autoFocus
+                  />
+                </LabeledField>
+              )}
+            </form.Field>
+
+            <form.Field name="model">
+              {(field) => (
+                <LabeledField name={field.name} label="Model" errors={field.state.meta.errors}>
+                  <Input
+                    id={field.name}
+                    placeholder="Swift"
+                    value={field.state.value}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isSaving}
+                    aria-invalid={!field.state.meta.isValid}
+                  />
+                </LabeledField>
+              )}
+            </form.Field>
+
+            <form.Field name="colour">
+              {(field) => (
+                <LabeledField name={field.name} label="Colour" errors={field.state.meta.errors}>
+                  <Input
+                    id={field.name}
+                    placeholder="White"
+                    value={field.state.value}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isSaving}
+                    aria-invalid={!field.state.meta.isValid}
+                  />
+                </LabeledField>
+              )}
+            </form.Field>
+
+            <form.Field name="seatCapacity">
+              {(field) => (
+                <LabeledField name={field.name} label="Passenger seats" errors={field.state.meta.errors}>
+                  <Select value={field.state.value} onValueChange={field.handleChange} disabled={isSaving}>
+                    <SelectTrigger id={field.name} className="w-full" aria-invalid={!field.state.meta.isValid}>
+                      <SelectValue placeholder="Choose" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {SEAT_OPTIONS.map((seats) => (
+                          <SelectItem key={seats} value={seats}>
+                            {seats}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </LabeledField>
+              )}
+            </form.Field>
           </div>
 
-          <TextField
-            label="Plate number"
-            placeholder="MH12AB1234"
-            value={values.plateNumber}
-            onChange={(e) => update('plateNumber', e.target.value)}
-            error={errors.plateNumber}
-            disabled={isSaving}
-          />
+          <form.Field name="plateNumber">
+            {(field) => (
+              <LabeledField name={field.name} label="Plate number" errors={field.state.meta.errors}>
+                <Input
+                  id={field.name}
+                  placeholder="MH12AB1234"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  onBlur={field.handleBlur}
+                  disabled={isSaving}
+                  aria-invalid={!field.state.meta.isValid}
+                />
+              </LabeledField>
+            )}
+          </form.Field>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => changeOpen(false)} disabled={isSaving}>

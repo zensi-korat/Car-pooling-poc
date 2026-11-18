@@ -6,11 +6,11 @@ import { env } from '@/config/env'
 import { ROUTES } from '@/constants/routes'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import type { LoginValues } from '@/features/auth/api/authSchema'
-import { useAuth } from '@/features/auth/useAuth'
+import { useAuthStore } from '@/features/auth/authStore'
 import { getErrorMessage } from '@/services/api'
 
 export function LoginPage() {
-  const { login } = useAuth()
+  const login = useAuthStore((state) => state.login)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

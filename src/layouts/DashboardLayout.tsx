@@ -19,6 +19,7 @@ import {
 import { ErrorBoundary } from 'react-error-boundary'
 import { Link, Outlet, useLocation } from 'react-router'
 import { PageError } from '@/components/PageError'
+import { ThemeRadioItems } from '@/components/ThemeToggle'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -26,6 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -44,13 +48,13 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { Switch } from '@/components/ui/switch'
 import { env } from '@/config/env'
 import { ROUTES } from '@/constants/routes'
 import type { Role } from '@/features/auth/api/authSchema'
-import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
-import { useTheme } from '@/hooks/useTheme'
+import { useCurrentUser } from '@/features/auth/authStore'
+import { useLogout } from '@/features/auth/hooks/useLogout'
 import { initials } from '@/lib/text'
+import { selectResolvedTheme, useThemeStore } from '@/stores/themeStore'
 
 // No `role` → every logged-in user sees it.
 type NavItem = { to: string; label: string; Icon: LucideIcon; role?: Role }
@@ -147,10 +151,9 @@ function AppSidebar() {
 
 function NavUser() {
   const user = useCurrentUser()
-  const { logout } = useAuth()
-  const { resolvedTheme, setTheme } = useTheme()
+  const logout = useLogout()
+  const resolvedTheme = useThemeStore(selectResolvedTheme)
   const { isMobile, state } = useSidebar()
-  const isDark = resolvedTheme === 'dark'
 
   return (
     <SidebarMenu>
@@ -188,16 +191,15 @@ function NavUser() {
                 My Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                setTheme(isDark ? 'light' : 'dark')
-              }}
-            >
-              {isDark ? <Moon /> : <Sun />}
-              {isDark ? 'Dark' : 'Light'}
-              <Switch checked={isDark} tabIndex={-1} aria-hidden className="pointer-events-none ml-auto" />
-            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                {resolvedTheme === 'dark' ? <Moon /> : <Sun />}
+                Theme
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <ThemeRadioItems />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onSelect={() => void logout()}>
               <LogOut />

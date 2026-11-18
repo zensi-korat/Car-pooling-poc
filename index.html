@@ -7,10 +7,10 @@
     <!-- %VITE_APP_NAME% is replaced by Vite with the value from .env -->
     <title>%VITE_APP_NAME% · Car pooling</title>
     <!-- Runs BEFORE React loads, so dark-mode users never see a white flash.
-         Must match ThemeProvider: same "theme" key and the same "dark" class. -->
+         Must match src/stores/themeStore.ts: same "pool-theme" key and the same "dark" class. -->
     <script>
       try {
-        var t = localStorage.getItem('theme')
+        var t = JSON.parse(localStorage.getItem('pool-theme') || '{}').state?.theme
         var dark = t === 'dark' || ((!t || t === 'system') && matchMedia('(prefers-color-scheme: dark)').matches)
         if (dark) document.documentElement.classList.add('dark')
       } catch (e) {}

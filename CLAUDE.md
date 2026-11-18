@@ -52,6 +52,7 @@ src/
   components/ui/           shadcn components (generated: don't hand-edit unless needed)
   hooks/                   shared hooks: useListParams, useDebouncedValue…
   lib/                     shared helpers: filters, dates, pagination, text, queryClient
+  stores/                  Zustand stores (themeStore.ts): client state many far-apart components share
   constants/               routes.ts (ROUTES: every page path) and queryKeys.ts (QUERY_KEYS: every query key)
   services/api/            the HTTP client: api(), ApiError, getErrorMessage, pageSchema/Page
   routes/                  AppRoutes + guards (`<RoleRoute role="DRIVER" />` for role pages)
@@ -95,8 +96,21 @@ No `lib/` folder per module: a module's helpers go in its one `<module>.ts` file
   free-form object → `z.record(z.string(), z.unknown())`; fields only described in text → add them after
   checking real data. Always check a **real response**, not Swagger's example.
 - Zod drops fields the schema doesn't list, so add a field to the schema before using it.
-- Form rules are Zod schemas too (see `auth/api/authSchema.ts` + `auth/auth.ts`).
+- Form rules are Zod schemas too, in the module's `api/<module>Schema.ts` (e.g. `loginSchema`, `rejectFormSchema`).
 - Request params and bodies we build ourselves stay plain TS types (nothing to check at runtime).
+
+## Forms (TanStack Form)
+
+- **Every form uses TanStack Form** (reference: `driver/rides/components/RideForm.tsx`, `auth/components/LoginForm.tsx`).
+  No `useState` for field values, no hand-made `submitted` flag.
+- `useForm({ defaultValues, validationLogic: revalidateLogic(), validators: { onDynamic: xSchema }, onSubmit })`:
+  errors show after the first submit, then update as the user fixes them.
+- Each field: `<form.Field name="…">` → `LabeledField` (label, hint, first error) → the shadcn control with
+  `id={field.name}`, `value`, `onChange → field.handleChange`, `onBlur={field.handleBlur}`, `aria-invalid={!field.state.meta.isValid}`.
+  Passwords use `PasswordInput`.
+- Validators only check: clean values (trim) in the schema and send `xSchema.parse(value)` from `onSubmit`.
+- Read form state outside a field with `<form.Subscribe selector={…}>`; refill a form with `form.reset(values)`.
+- `<form noValidate onSubmit={(e) => { e.preventDefault(); void form.handleSubmit() }}>`.
 
 ## Data fetching (TanStack Query)
 
@@ -105,6 +119,17 @@ No `lib/` folder per module: a module's helpers go in its one `<module>.ts` file
 - Lists use `placeholderData: keepPreviousData`, and `isPlaceholderData` shows the skeleton.
 - Mutations live in their own hook (`useReviewVehicle`) and invalidate the affected keys in `onSettled`.
   Close dialogs or forms with the per-call `onSuccess`.
+
+## Client state (Zustand)
+
+- Choose in order: server data → TanStack Query; one component → `useState`; page/filters → URL; form input →
+  TanStack Form; shared by far-apart components → a Zustand store.
+- App-wide stores go in `src/stores/` (`themeStore.ts`); a module's own store goes in its folder
+  (`features/auth/authStore.ts`). Hooks (`useNavigate`) stay out of stores: wrap them in a hook (`useLogout`).
+- Always read with a selector: `useThemeStore((state) => state.theme)`, never `useThemeStore()` alone.
+- Derived values are selector functions (`selectResolvedTheme`), not stored fields. Change state only through `set`.
+- Wrap every store in `devtools(…, { name })` (outermost, around `persist`) and name every change:
+  `set({ … }, false, 'auth/login')`. It is off in production by default.
 
 ## Routes
 
