@@ -6,21 +6,19 @@ import { BrowserRouter } from 'react-router'
 import './index.css'
 import App from './App.tsx'
 import { TooltipProvider } from './components/ui/tooltip.tsx'
-import { ThemeProvider } from './context/ThemeProvider.tsx'
-import { AuthProvider } from './features/auth/AuthProvider.tsx'
+import { useAuthStore } from './features/auth/authStore.ts'
 import { queryClient } from './lib/queryClient.ts'
+
+// The httpOnly cookie may still hold a session: ask the server once, before the first render.
+void useAuthStore.getState().checkSession()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <App />
-            </TooltipProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
       </BrowserRouter>
       <ReactQueryDevtools buttonPosition="bottom-right" />
     </QueryClientProvider>

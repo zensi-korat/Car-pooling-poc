@@ -6,11 +6,11 @@ import { env } from '@/config/env'
 import { ROUTES } from '@/constants/routes'
 import { SignupForm } from '@/features/auth/components/SignupForm'
 import type { SignupValues } from '@/features/auth/api/authSchema'
-import { useAuth } from '@/features/auth/useAuth'
+import { useAuthStore } from '@/features/auth/authStore'
 import { getErrorMessage } from '@/services/api'
 
 export function SignupPage() {
-  const { signup } = useAuth()
+  const signup = useAuthStore((state) => state.signup)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

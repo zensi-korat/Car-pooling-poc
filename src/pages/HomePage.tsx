@@ -1,7 +1,7 @@
 import { IdCard } from 'lucide-react'
 import { RoleBadge, VerifiedBadge } from '@/components/badges'
 import { DetailRow, PageHeader, SectionCard } from '@/components/page'
-import { useCurrentUser } from '@/features/auth/useAuth'
+import { useCurrentUser } from '@/features/auth/authStore'
 
 export function HomePage() {
   const user = useCurrentUser()

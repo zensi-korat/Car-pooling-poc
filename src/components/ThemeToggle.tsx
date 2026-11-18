@@ -1,8 +1,13 @@
-import { Check, Monitor, Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import type { Theme } from '@/context/ThemeContext'
-import { useTheme } from '@/hooks/useTheme'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { selectResolvedTheme, useThemeStore, type Theme } from '@/stores/themeStore'
 
 const options: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: 'light', label: 'Light', Icon: Sun },
@@ -10,8 +15,25 @@ const options: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: 'system', label: 'System', Icon: Monitor },
 ]
 
+// Light / Dark / System, with a ✓ on the current pick. Used by the header and the sidebar menu.
+export function ThemeRadioItems() {
+  const theme = useThemeStore((state) => state.theme)
+  const setTheme = useThemeStore((state) => state.setTheme)
+
+  return (
+    <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)}>
+      {options.map(({ value, label, Icon }) => (
+        <DropdownMenuRadioItem key={value} value={value}>
+          <Icon />
+          {label}
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
+  )
+}
+
 export function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme } = useTheme()
+  const resolvedTheme = useThemeStore(selectResolvedTheme)
   const CurrentIcon = resolvedTheme === 'dark' ? Moon : Sun
 
   return (
@@ -22,13 +44,7 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {options.map(({ value, label, Icon }) => (
-          <DropdownMenuItem key={value} onSelect={() => setTheme(value)}>
-            <Icon />
-            {label}
-            {theme === value && <Check className="ml-auto" />}
-          </DropdownMenuItem>
-        ))}
+        <ThemeRadioItems />
       </DropdownMenuContent>
     </DropdownMenu>
   )

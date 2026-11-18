@@ -1,42 +1,42 @@
-import { useState, type SubmitEvent } from 'react'
+import { useState } from 'react'
+import { revalidateLogic, useForm } from '@tanstack/react-form'
 import { Loader2, ShieldCheck, UserRound } from 'lucide-react'
-import { FormAlert, TextField } from '@/components/form'
+import { FormAlert, LabeledField } from '@/components/form'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { StatusBadge, VerifiedBadge } from '@/components/badges'
 import { DetailRow, PageHeader, SectionCard } from '@/components/page'
-import { useAuth, useCurrentUser } from '@/features/auth/useAuth'
+import { profileFormSchema } from '@/features/auth/api/authSchema'
+import { useAuthStore, useCurrentUser } from '@/features/auth/authStore'
 import { getErrorMessage } from '@/services/api'
 
 export function ProfilePage() {
   const user = useCurrentUser()
-  const { updateName } = useAuth()
+  const updateName = useAuthStore((state) => state.updateName)
 
-  const [name, setName] = useState(user.name)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
-  const trimmed = name.trim()
-  const nameError = trimmed ? undefined : 'Name is required'
-  const hasChanged = trimmed !== user.name
-
-  async function handleSave(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (nameError || !hasChanged) return
-
-    setIsSaving(true)
-    setError(null)
-    setSaved(false)
-    try {
-      const updated = await updateName(trimmed)
-      setName(updated.name)
-      setSaved(true)
-    } catch (err) {
-      setError(getErrorMessage(err))
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  const form = useForm({
+    defaultValues: { name: user.name },
+    validationLogic: revalidateLogic(),
+    validators: { onDynamic: profileFormSchema },
+    onSubmit: async ({ value, formApi }) => {
+      setIsSaving(true)
+      setError(null)
+      setSaved(false)
+      try {
+        const updated = await updateName(profileFormSchema.parse(value).name)
+        formApi.reset({ name: updated.name })
+        setSaved(true)
+      } catch (err) {
+        setError(getErrorMessage(err))
+      } finally {
+        setIsSaving(false)
+      }
+    },
+  })
 
   return (
     <>
@@ -44,7 +44,14 @@ export function ProfilePage() {
 
       <div className="flex max-w-3xl flex-col gap-6 p-6">
         <SectionCard title="Personal details" Icon={UserRound}>
-          <form onSubmit={handleSave} noValidate className="flex max-w-sm flex-col gap-5 p-5">
+          <form
+            noValidate
+            className="flex max-w-sm flex-col gap-5 p-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              void form.handleSubmit()
+            }}
+          >
             {error && <FormAlert>{error}</FormAlert>}
             {saved && (
               <p aria-live="polite" className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
@@ -52,28 +59,40 @@ export function ProfilePage() {
               </p>
             )}
 
-            <TextField
-              label="Full name"
-              autoComplete="name"
-              maxLength={100}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                setSaved(false)
-              }}
-              error={nameError}
-              disabled={isSaving}
-            />
-
-            <Button type="submit" className="h-10 self-start px-5" disabled={isSaving || !!nameError || !hasChanged}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="animate-spin" /> Saving…
-                </>
-              ) : (
-                'Save changes'
+            <form.Field name="name">
+              {(field) => (
+                <LabeledField name={field.name} label="Full name" errors={field.state.meta.errors}>
+                  <Input
+                    id={field.name}
+                    autoComplete="name"
+                    maxLength={100}
+                    className="h-10"
+                    value={field.state.value}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value)
+                      setSaved(false)
+                    }}
+                    onBlur={field.handleBlur}
+                    disabled={isSaving}
+                    aria-invalid={!field.state.meta.isValid}
+                  />
+                </LabeledField>
               )}
-            </Button>
+            </form.Field>
+
+            <form.Subscribe selector={(state) => state.values.name.trim() !== user.name}>
+              {(hasChanged) => (
+                <Button type="submit" className="h-10 self-start px-5" disabled={isSaving || !hasChanged}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="animate-spin" /> Saving…
+                    </>
+                  ) : (
+                    'Save changes'
+                  )}
+                </Button>
+              )}
+            </form.Subscribe>
           </form>
         </SectionCard>
 
