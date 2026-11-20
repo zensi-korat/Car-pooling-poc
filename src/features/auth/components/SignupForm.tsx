@@ -1,17 +1,13 @@
 import { useRef } from 'react'
 import { revalidateLogic, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { CarFront, Loader2, UserPlus, Users, type LucideIcon } from 'lucide-react'
 import { FormAlert, LabeledField, PasswordInput } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { env } from '@/config/env'
 import { SIGNUP_ROLES, signupSchema, type SignupRole, type SignupValues } from '../api/authSchema'
-
-type SignupFormProps = Readonly<{
-  onSubmit: (values: SignupValues) => void
-  isSubmitting?: boolean
-  serverError?: string | null
-}>
+import { useAuthStore } from '../authStore'
 
 const ROLE_OPTIONS: Record<SignupRole, { title: string; description: string; Icon: LucideIcon }> = {
   RIDER: { title: 'I need a ride', description: 'Find drivers going your way', Icon: Users },
@@ -20,7 +16,9 @@ const ROLE_OPTIONS: Record<SignupRole, { title: string; description: string; Ico
 
 const EMPTY_SIGNUP: SignupValues = { name: '', email: '', phone: '', password: '', role: 'RIDER' }
 
-export function SignupForm({ onSubmit, isSubmitting = false, serverError }: SignupFormProps) {
+export function SignupForm() {
+  const signup = useMutation({ mutationFn: useAuthStore((state) => state.signup) })
+  const isSubmitting = signup.isPending
   const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
@@ -28,7 +26,7 @@ export function SignupForm({ onSubmit, isSubmitting = false, serverError }: Sign
     validationLogic: revalidateLogic(),
     validators: { onDynamic: signupSchema },
     // The validator only checks; parse() returns the cleaned values (name, email, phone trimmed).
-    onSubmit: ({ value }) => onSubmit(signupSchema.parse(value)),
+    onSubmit: ({ value }) => signup.mutate(signupSchema.parse(value)),
     // Errors are drawn on the next frame: focus the first wrong field then.
     onSubmitInvalid: () =>
       requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()),
@@ -44,7 +42,7 @@ export function SignupForm({ onSubmit, isSubmitting = false, serverError }: Sign
         void form.handleSubmit()
       }}
     >
-      {serverError && <FormAlert>{serverError}</FormAlert>}
+      {signup.isError && <FormAlert>{signup.error.message}</FormAlert>}
 
       <form.Field name="role">
         {(field) => (

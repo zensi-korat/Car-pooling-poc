@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { revalidateLogic, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { Loader2, ShieldCheck, UserRound } from 'lucide-react'
 import { FormAlert, LabeledField } from '@/components/form'
 import { Button } from '@/components/ui/button'
@@ -8,34 +8,20 @@ import { StatusBadge, VerifiedBadge } from '@/components/badges'
 import { DetailRow, PageHeader, SectionCard } from '@/components/page'
 import { profileFormSchema } from '@/features/auth/api/authSchema'
 import { useAuthStore, useCurrentUser } from '@/features/auth/authStore'
-import { getErrorMessage } from '@/services/api'
 
 export function ProfilePage() {
   const user = useCurrentUser()
-  const updateName = useAuthStore((state) => state.updateName)
-
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
+  const updateName = useMutation({ mutationFn: useAuthStore((state) => state.updateName) })
+  const isSaving = updateName.isPending
 
   const form = useForm({
     defaultValues: { name: user.name },
     validationLogic: revalidateLogic(),
     validators: { onDynamic: profileFormSchema },
-    onSubmit: async ({ value, formApi }) => {
-      setIsSaving(true)
-      setError(null)
-      setSaved(false)
-      try {
-        const updated = await updateName(profileFormSchema.parse(value).name)
-        formApi.reset({ name: updated.name })
-        setSaved(true)
-      } catch (err) {
-        setError(getErrorMessage(err))
-      } finally {
-        setIsSaving(false)
-      }
-    },
+    onSubmit: ({ value, formApi }) =>
+      updateName.mutate(profileFormSchema.parse(value).name, {
+        onSuccess: (updated) => formApi.reset({ name: updated.name }),
+      }),
   })
 
   return (
@@ -52,8 +38,8 @@ export function ProfilePage() {
               void form.handleSubmit()
             }}
           >
-            {error && <FormAlert>{error}</FormAlert>}
-            {saved && (
+            {updateName.isError && <FormAlert>{updateName.error.message}</FormAlert>}
+            {updateName.isSuccess && (
               <p aria-live="polite" className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
                 Your name was updated.
               </p>
@@ -70,7 +56,7 @@ export function ProfilePage() {
                     value={field.state.value}
                     onChange={(event) => {
                       field.handleChange(event.target.value)
-                      setSaved(false)
+                      updateName.reset()
                     }}
                     onBlur={field.handleBlur}
                     disabled={isSaving}

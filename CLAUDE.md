@@ -59,6 +59,9 @@ src/
   layouts/                 DashboardLayout (sidebar NAV_ITEMS, each with an optional `role`)
 ```
 
+`zustand-practice/`, `zustand-chat/` and `redux-chat/` (repo root) are separate learning sandboxes (each has its own package.json;
+run `npm run dev` inside it). They are not part of the app: never import from them.
+
 Every module has the same inside:
 
 ```
@@ -118,6 +121,7 @@ No `lib/` folder per module: a module's helpers go in its one `<module>.ts` file
   `invalidateQueries({ queryKey: QUERY_KEYS.admin.all })` refreshes them all. Never write a key array in a hook.
 - Lists use `placeholderData: keepPreviousData`, and `isPlaceholderData` shows the skeleton.
 - Mutations live in their own hook (`useReviewVehicle`) and invalidate the affected keys in `onSettled`.
+  A mutation that only calls one function (login, signup) is written inline: `useMutation({ mutationFn: … })`.
   Close dialogs or forms with the per-call `onSuccess`.
 
 ## Client state (Zustand)

@@ -38,5 +38,7 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
+    // Only Pool's own tests (the zustand-chat / redux-chat sandboxes run their own).
+    test: { include: ['src/**/*.test.{ts,tsx}'] },
   }
 })

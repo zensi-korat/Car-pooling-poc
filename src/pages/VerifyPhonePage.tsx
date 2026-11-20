@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { revalidateLogic, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { AppHeader } from '@/components/AppHeader'
 import { FormAlert, LabeledField } from '@/components/form'
@@ -10,18 +11,16 @@ import { resendCode } from '@/features/auth/api/authApi'
 import { verifyPhoneFormSchema } from '@/features/auth/api/authSchema'
 import { useAuthStore, useCurrentUser } from '@/features/auth/authStore'
 import { useLogout } from '@/features/auth/hooks/useLogout'
-import { getErrorMessage } from '@/services/api'
 
 export function VerifyPhonePage() {
   const user = useCurrentUser()
-  const verifyPhone = useAuthStore((state) => state.verifyPhone)
+  const verify = useMutation({ mutationFn: useAuthStore((state) => state.verifyPhone) })
+  const resend = useMutation({ mutationFn: resendCode })
   const logout = useLogout()
+  const isVerifying = verify.isPending
+  const error = verify.error ?? resend.error
+  const notice = resend.data?.message
 
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const [isResending, setIsResending] = useState(false)
-  const [notice, setNotice] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
 
   useEffect(() => {
@@ -34,32 +33,12 @@ export function VerifyPhonePage() {
     defaultValues: { code: '' },
     validationLogic: revalidateLogic(),
     validators: { onDynamic: verifyPhoneFormSchema },
-    onSubmit: async ({ value }) => {
-      setIsVerifying(true)
-      setError(null)
-      try {
-        await verifyPhone(value.code)
-      } catch (err) {
-        setError(getErrorMessage(err))
-      } finally {
-        setIsVerifying(false)
-      }
-    },
+    onSubmit: ({ value }) => verify.mutate(value.code),
   })
 
-  async function handleResend() {
-    setIsResending(true)
-    setError(null)
-    setNotice(null)
-    try {
-      const result = await resendCode()
-      setNotice(result.message)
-      setSecondsLeft(result.resendAfterSeconds)
-    } catch (err) {
-      setError(getErrorMessage(err))
-    } finally {
-      setIsResending(false)
-    }
+  function handleResend() {
+    verify.reset()
+    resend.mutate(undefined, { onSuccess: (result) => setSecondsLeft(result.resendAfterSeconds) })
   }
 
   return (
@@ -83,7 +62,7 @@ export function VerifyPhonePage() {
                 void form.handleSubmit()
               }}
             >
-              {error && <FormAlert>{error}</FormAlert>}
+              {error && <FormAlert>{error.message}</FormAlert>}
               {notice && (
                 <p aria-live="polite" className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
                   {notice}
@@ -129,7 +108,7 @@ export function VerifyPhonePage() {
                   variant="link"
                   className="h-auto p-0"
                   onClick={handleResend}
-                  disabled={isResending || secondsLeft > 0}
+                  disabled={resend.isPending || secondsLeft > 0}
                 >
                   {secondsLeft > 0 ? `Resend in ${secondsLeft}s` : 'Resend code'}
                 </Button>

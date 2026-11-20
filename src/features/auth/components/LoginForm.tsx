@@ -1,20 +1,18 @@
 import { useRef } from 'react'
 import { revalidateLogic, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { Loader2, LogIn } from 'lucide-react'
 import { FormAlert, LabeledField, PasswordInput } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { loginSchema, type LoginValues } from '../api/authSchema'
-
-type LoginFormProps = Readonly<{
-  onSubmit: (values: LoginValues) => void
-  isSubmitting?: boolean
-  serverError?: string | null
-}>
+import { useAuthStore } from '../authStore'
 
 const EMPTY_LOGIN: LoginValues = { email: '', password: '' }
 
-export function LoginForm({ onSubmit, isSubmitting = false, serverError }: LoginFormProps) {
+export function LoginForm() {
+  const login = useMutation({ mutationFn: useAuthStore((state) => state.login) })
+  const isSubmitting = login.isPending
   const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
@@ -22,7 +20,7 @@ export function LoginForm({ onSubmit, isSubmitting = false, serverError }: Login
     validationLogic: revalidateLogic(),
     validators: { onDynamic: loginSchema },
     // The validator only checks; parse() returns the cleaned values (email trimmed).
-    onSubmit: ({ value }) => onSubmit(loginSchema.parse(value)),
+    onSubmit: ({ value }) => login.mutate(loginSchema.parse(value)),
     // Errors are drawn on the next frame: focus the first wrong field then.
     onSubmitInvalid: () =>
       requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()),
@@ -38,7 +36,7 @@ export function LoginForm({ onSubmit, isSubmitting = false, serverError }: Login
         void form.handleSubmit()
       }}
     >
-      {serverError && <FormAlert>{serverError}</FormAlert>}
+      {login.isError && <FormAlert>{login.error.message}</FormAlert>}
 
       <form.Field name="email">
         {(field) => (
