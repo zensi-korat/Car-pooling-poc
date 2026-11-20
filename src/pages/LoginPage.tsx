@@ -1,31 +1,11 @@
-import { useState } from 'react'
 import { Link } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
 import { ROUTES } from '@/constants/routes'
 import { LoginForm } from '@/features/auth/components/LoginForm'
-import type { LoginValues } from '@/features/auth/api/authSchema'
-import { useAuthStore } from '@/features/auth/authStore'
-import { getErrorMessage } from '@/services/api'
 
 export function LoginPage() {
-  const login = useAuthStore((state) => state.login)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleLogin(values: LoginValues) {
-    setIsSubmitting(true)
-    setError(null)
-    try {
-      await login(values)
-    } catch (err) {
-      setError(getErrorMessage(err))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <div className="flex min-h-svh flex-col">
       <AppHeader />
@@ -38,7 +18,7 @@ export function LoginPage() {
               <CardDescription>Log in to find a ride or offer one.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
-              <LoginForm onSubmit={handleLogin} isSubmitting={isSubmitting} serverError={error} />
+              <LoginForm />
             </CardContent>
           </Card>
 

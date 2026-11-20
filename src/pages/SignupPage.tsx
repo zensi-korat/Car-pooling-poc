@@ -1,31 +1,11 @@
-import { useState } from 'react'
 import { Link } from 'react-router'
 import { AppHeader } from '@/components/AppHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { env } from '@/config/env'
 import { ROUTES } from '@/constants/routes'
 import { SignupForm } from '@/features/auth/components/SignupForm'
-import type { SignupValues } from '@/features/auth/api/authSchema'
-import { useAuthStore } from '@/features/auth/authStore'
-import { getErrorMessage } from '@/services/api'
 
 export function SignupPage() {
-  const signup = useAuthStore((state) => state.signup)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleSignup(values: SignupValues) {
-    setIsSubmitting(true)
-    setError(null)
-    try {
-      await signup(values)
-    } catch (err) {
-      setError(getErrorMessage(err))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <div className="flex min-h-svh flex-col">
       <AppHeader />
@@ -38,7 +18,7 @@ export function SignupPage() {
               <CardDescription>Join {env.appName} to share rides with people going your way.</CardDescription>
             </CardHeader>
             <CardContent>
-              <SignupForm onSubmit={handleSignup} isSubmitting={isSubmitting} serverError={error} />
+              <SignupForm />
             </CardContent>
           </Card>
 
