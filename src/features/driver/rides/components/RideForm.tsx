@@ -18,6 +18,7 @@ import { rideFormSchema, type RideFormValues } from '../api/ridesSchema'
 import { useCreateRide } from '../hooks/useCreateRide'
 import { useUpdateRide } from '../hooks/useUpdateRide'
 import { toRideBody, toRideFormValues } from '../rides'
+import { RoutePreviewMap } from './RoutePreviewMap'
 
 const EMPTY_RIDE: RideFormValues = {
   origin: null,
@@ -56,125 +57,137 @@ export function RideForm({ vehicles, ride }: RideFormProps) {
   const isSaving = save.isPending
 
   return (
-    <Card className="max-w-2xl">
-      <form
-        noValidate
-        className="flex flex-col gap-6"
-        onSubmit={(event) => {
-          event.preventDefault()
-          void form.handleSubmit()
-        }}
-      >
-        <CardContent>
-          <FieldGroup>
-            {save.isError && <FormAlert>{save.error.message}</FormAlert>}
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card>
+        <form
+          noValidate
+          className="flex flex-col gap-6"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit()
+          }}
+        >
+          <CardContent>
+            <FieldGroup>
+              {save.isError && <FormAlert>{save.error.message}</FormAlert>}
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <form.Field name="origin">
-                {(field) => (
-                  <LabeledField name={field.name} label="From" errors={field.state.meta.errors}>
-                    <PlaceInput
-                      id={field.name}
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                      placeholder="Where does the ride start?"
-                      aria-invalid={!field.state.meta.isValid}
-                    />
-                  </LabeledField>
-                )}
-              </form.Field>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <form.Field name="origin">
+                  {(field) => (
+                    <LabeledField name={field.name} label="From" errors={field.state.meta.errors}>
+                      <PlaceInput
+                        id={field.name}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        placeholder="Where does the ride start?"
+                        aria-invalid={!field.state.meta.isValid}
+                      />
+                    </LabeledField>
+                  )}
+                </form.Field>
 
-              <form.Field name="destination">
-                {(field) => (
-                  <LabeledField name={field.name} label="To" errors={field.state.meta.errors}>
-                    <PlaceInput
-                      id={field.name}
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                      placeholder="Where does it end?"
-                      aria-invalid={!field.state.meta.isValid}
-                    />
-                  </LabeledField>
-                )}
-              </form.Field>
+                <form.Field name="destination">
+                  {(field) => (
+                    <LabeledField name={field.name} label="To" errors={field.state.meta.errors}>
+                      <PlaceInput
+                        id={field.name}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        placeholder="Where does it end?"
+                        aria-invalid={!field.state.meta.isValid}
+                      />
+                    </LabeledField>
+                  )}
+                </form.Field>
 
-              <form.Field name="departureTime">
-                {(field) => (
-                  <LabeledField name={field.name} label="Departure" errors={field.state.meta.errors}>
-                    <DateTimePicker
-                      id={field.name}
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                      disablePastDates
-                      disabled={isSaving}
-                      aria-invalid={!field.state.meta.isValid}
-                    />
-                  </LabeledField>
-                )}
-              </form.Field>
+                <form.Field name="departureTime">
+                  {(field) => (
+                    <LabeledField name={field.name} label="Departure" errors={field.state.meta.errors}>
+                      <DateTimePicker
+                        id={field.name}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        disablePastDates
+                        disabled={isSaving}
+                        aria-invalid={!field.state.meta.isValid}
+                      />
+                    </LabeledField>
+                  )}
+                </form.Field>
 
-              <form.Field name="estimatedCost">
+                <form.Field name="estimatedCost">
+                  {(field) => (
+                    <LabeledField
+                      name={field.name}
+                      label="Total fare (₹)"
+                      description="Split among the confirmed riders."
+                      errors={field.state.meta.errors}
+                    >
+                      <Input
+                        id={field.name}
+                        inputMode="decimal"
+                        placeholder="1200"
+                        value={field.state.value}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        onBlur={field.handleBlur}
+                        disabled={isSaving}
+                        aria-invalid={!field.state.meta.isValid}
+                      />
+                    </LabeledField>
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="vehicleId">
                 {(field) => (
                   <LabeledField
                     name={field.name}
-                    label="Total fare (₹)"
-                    description="Split among the confirmed riders."
+                    label="Vehicle"
+                    description="Its seats become the ride's seats."
                     errors={field.state.meta.errors}
                   >
-                    <Input
-                      id={field.name}
-                      inputMode="decimal"
-                      placeholder="1200"
-                      value={field.state.value}
-                      onChange={(event) => field.handleChange(event.target.value)}
-                      onBlur={field.handleBlur}
-                      disabled={isSaving}
-                      aria-invalid={!field.state.meta.isValid}
-                    />
+                    <Select value={field.state.value} onValueChange={field.handleChange} disabled={isSaving}>
+                      <SelectTrigger id={field.name} className="w-full" aria-invalid={!field.state.meta.isValid}>
+                        <SelectValue placeholder="Choose an approved vehicle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {vehicles.map((vehicle) => (
+                            <SelectItem key={vehicle.id} value={vehicle.id}>
+                              {vehicle.make} {vehicle.model} · {vehicle.plateNumber} · {vehicle.seatCapacity} seats
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </LabeledField>
                 )}
               </form.Field>
-            </div>
+            </FieldGroup>
+          </CardContent>
 
-            <form.Field name="vehicleId">
-              {(field) => (
-                <LabeledField
-                  name={field.name}
-                  label="Vehicle"
-                  description="Its seats become the ride's seats."
-                  errors={field.state.meta.errors}
-                >
-                  <Select value={field.state.value} onValueChange={field.handleChange} disabled={isSaving}>
-                    <SelectTrigger id={field.name} className="w-full" aria-invalid={!field.state.meta.isValid}>
-                      <SelectValue placeholder="Choose an approved vehicle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {vehicles.map((vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.make} {vehicle.model} · {vehicle.plateNumber} · {vehicle.seatCapacity} seats
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </LabeledField>
-              )}
-            </form.Field>
-          </FieldGroup>
-        </CardContent>
+          <CardFooter className="justify-end gap-2">
+            <Button variant="outline" asChild>
+              <Link to={ROUTES.driver.rides}>Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving && <Loader2 data-icon="inline-start" className="animate-spin" />}
+              {ride ? 'Save changes' : 'Post ride'}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
 
-        <CardFooter className="justify-end gap-2">
-          <Button variant="outline" asChild>
-            <Link to={ROUTES.driver.rides}>Cancel</Link>
-          </Button>
-          <Button type="submit" disabled={isSaving}>
-            {isSaving && <Loader2 data-icon="inline-start" className="animate-spin" />}
-            {ride ? 'Save changes' : 'Post ride'}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+      {/* One value per selector: Subscribe compares with ===, so a new [origin, destination] array */}
+      {/* would count as a change on every keystroke. */}
+      <form.Subscribe selector={(state) => state.values.origin}>
+        {(origin) => (
+          <form.Subscribe selector={(state) => state.values.destination}>
+            {(destination) => <RoutePreviewMap origin={origin} destination={destination} />}
+          </form.Subscribe>
+        )}
+      </form.Subscribe>
+    </div>
   )
 }
 

@@ -1,7 +1,14 @@
 import axios from 'axios'
 import { z } from 'zod'
 import { env } from '@/config/env'
-import { locationIqErrorSchema, placeSchema, type Place } from './placesSchema'
+import {
+  locationIqErrorSchema,
+  placeSchema,
+  roadRouteSchema,
+  type Place,
+  type RoadRoute,
+  type RouteEnds,
+} from './placesSchema'
 
 const placesSchema = z.array(placeSchema)
 
@@ -23,4 +30,14 @@ export async function searchPlaces(text: string, signal?: AbortSignal): Promise<
     }
     throw error
   }
+}
+
+// GET /v1/directions/driving/{lng,lat;lng,lat} → the road line between the two ends (longitude first).
+export async function getRoadRoute(ends: RouteEnds, signal?: AbortSignal): Promise<RoadRoute> {
+  const coordinates = `${ends.originLng},${ends.originLat};${ends.destLng},${ends.destLat}`
+  const { data } = await axios.get(`https://us1.locationiq.com/v1/directions/driving/${coordinates}`, {
+    params: { key: env.locationIqKey, overview: 'full', geometries: 'geojson' },
+    signal,
+  })
+  return roadRouteSchema.parse(data)
 }
