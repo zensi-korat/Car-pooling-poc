@@ -27,7 +27,7 @@ export function RoutePreviewMap({ origin, destination }: RoutePreviewMapProps) {
 
   if (!origin && !destination) {
     return (
-      <Empty className="min-h-80 border border-dashed">
+      <Empty className="min-h-80 rounded-xl border border-dashed bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <MapPinned />

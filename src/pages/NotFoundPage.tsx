@@ -9,9 +9,9 @@ export function NotFoundPage() {
       <AppHeader />
 
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-16 text-center">
-        <p className="text-6xl font-semibold tracking-tight">404</p>
+        <p className="text-7xl font-extrabold tracking-tight text-primary">404</p>
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold">Page not found</h1>
+          <h1 className="text-xl font-bold">Page not found</h1>
           <p className="text-sm text-muted-foreground">This page doesn't exist or has moved.</p>
         </div>
         <Button asChild>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Ban, CalendarClock, Car, Phone, Ticket } from 'lucide-react'
+import { Ban, Car, Phone, Ticket } from 'lucide-react'
 import { BookingStatusBadge } from '@/components/badges'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { InfoTile, RouteLine } from '@/components/page'
+import { DepartureTime, InfoTile, RouteLine } from '@/components/page'
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -34,7 +34,7 @@ export function MyBookingsList({ bookings }: Readonly<{ bookings: RiderBooking[]
 
   if (bookings.length === 0) {
     return (
-      <Empty className="border border-dashed">
+      <Empty className="rounded-xl border border-dashed bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Ticket />
@@ -64,11 +64,10 @@ function BookingCard({ booking, now }: Readonly<{ booking: RiderBooking; now: Da
   if (isOpen && !canCancel) hint = 'Departs today, so it can no longer be cancelled.'
 
   return (
-    <Card>
+    <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarClock className="size-4 text-muted-foreground" />
-          {formatDateTime(ride.departureTime)}
+        <CardTitle>
+          <DepartureTime iso={ride.departureTime} />
         </CardTitle>
         {hint && <CardDescription>{hint}</CardDescription>}
         <CardAction>
@@ -81,7 +80,7 @@ function BookingCard({ booking, now }: Readonly<{ booking: RiderBooking; now: Da
           <RouteLine from={ride.originLabel} to={ride.destLabel} />
           <div className="flex shrink-0 flex-col items-end">
             <span className="text-xs text-muted-foreground">Your share</span>
-            <span className="text-lg font-semibold tabular-nums">{formatFare(booking.costShare)}</span>
+            <span className="text-2xl font-extrabold tracking-tight tabular-nums">{formatFare(booking.costShare)}</span>
           </div>
         </div>
 
@@ -117,7 +116,7 @@ function BookingCard({ booking, now }: Readonly<{ booking: RiderBooking; now: Da
       </CardContent>
 
       {canCancel && (
-        <CardFooter className="justify-end">
+        <CardFooter className="justify-end border-t-0 bg-transparent">
           <CancelBookingButton booking={booking} />
         </CardFooter>
       )}

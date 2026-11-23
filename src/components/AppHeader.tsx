@@ -7,8 +7,8 @@ import { ROUTES } from '@/constants/routes'
 export function AppHeader() {
   return (
     <header className="flex items-center justify-between px-6 py-4">
-      <Link to={ROUTES.home} className="flex items-center gap-2 rounded-lg font-semibold tracking-tight">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <Link to={ROUTES.home} className="flex items-center gap-2 rounded-xl text-lg font-extrabold tracking-tight">
+        <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           <CarFront className="size-4" />
         </div>
         {env.appName}

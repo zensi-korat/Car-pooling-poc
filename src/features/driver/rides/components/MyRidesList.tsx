@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Ban, CalendarClock, Car, CircleCheck, Pencil, Route, Users, type LucideIcon } from 'lucide-react'
+import { Ban, Car, CircleCheck, Pencil, Route, Users, type LucideIcon } from 'lucide-react'
 import { generatePath, Link } from 'react-router'
 import { RideStatusBadge } from '@/components/badges'
-import { InfoTile, RouteLine } from '@/components/page'
+import { DepartureTime, InfoTile, RouteLine } from '@/components/page'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES } from '@/constants/routes'
 import type { Ride, RideStatus } from '@/features/shared/rides/api/rideSchema'
-import { formatDateTime, formatFare } from '@/lib/format'
+import { formatFare } from '@/lib/format'
 import { getRideActions, ridesForTab } from '../rides'
 import { CancelRideButton, CompleteRideButton } from './RideActions'
 import { RideBookingsSheet } from './RideBookingsSheet'
@@ -94,7 +94,7 @@ function RideCards({ rides, tab, now }: Readonly<{ rides: Ride[] | undefined; ta
 
   if (rides.length === 0) {
     return (
-      <Empty className="border border-dashed">
+      <Empty className="rounded-xl border border-dashed bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <tab.Icon />
@@ -124,11 +124,10 @@ function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
   else if (ride.status === 'SCHEDULED' && !canCancel) hint = 'Departs today, so it can no longer be cancelled.'
 
   return (
-    <Card>
+    <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarClock className="size-4 text-muted-foreground" />
-          {formatDateTime(ride.departureTime)}
+        <CardTitle>
+          <DepartureTime iso={ride.departureTime} />
         </CardTitle>
         {hint && <CardDescription>{hint}</CardDescription>}
         <CardAction>
@@ -141,7 +140,9 @@ function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
           <RouteLine from={ride.originLabel} to={ride.destLabel} />
           <div className="flex shrink-0 flex-col items-end">
             <span className="text-xs text-muted-foreground">Total fare</span>
-            <span className="text-lg font-semibold tabular-nums">{formatFare(ride.estimatedCost)}</span>
+            <span className="text-2xl font-extrabold tracking-tight tabular-nums">
+              {formatFare(ride.estimatedCost)}
+            </span>
           </div>
         </div>
 
@@ -173,7 +174,7 @@ function RideCard({ ride, now }: Readonly<{ ride: Ride; now: Date }>) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex-wrap justify-end gap-2">
+      <CardFooter className="flex-wrap justify-end gap-2 border-t-0 bg-transparent">
         <RideBookingsSheet ride={ride} canCancelBookings={canCancel} />
         {canEdit && (
           <Button variant="outline" size="sm" asChild>
