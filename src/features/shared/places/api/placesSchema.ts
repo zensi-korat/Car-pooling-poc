@@ -20,3 +20,16 @@ export const placeSchema = z
 export type Place = z.infer<typeof placeSchema>
 
 export const locationIqErrorSchema = z.object({ error: z.string() })
+
+// GET /v1/directions/driving → the best route's road line. GeoJSON points arrive as [lng, lat]; Leaflet wants [lat, lng].
+export const roadRouteSchema = z
+  .object({
+    routes: z
+      .array(z.object({ geometry: z.object({ coordinates: z.array(z.tuple([z.number(), z.number()])) }) }))
+      .min(1),
+  })
+  .transform(({ routes }) => routes[0].geometry.coordinates.map(([lng, lat]): [number, number] => [lat, lng]))
+export type RoadRoute = z.infer<typeof roadRouteSchema>
+
+// The two ends of a route. A Ride fits this shape, so a ride can be passed as it is.
+export type RouteEnds = { originLat: number; originLng: number; destLat: number; destLng: number }

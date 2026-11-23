@@ -1,13 +1,16 @@
-import { CalendarClock, SearchX, Ticket, Users } from 'lucide-react'
+import { CalendarClock, MapPin, SearchX, Ticket, Users } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { InfoTile, RouteLine } from '@/components/page'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/constants/routes'
 import type { Ride } from '@/features/shared/rides/api/rideSchema'
 import { formatDateTime, formatFare } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import { useBookSeat } from '../hooks/useBookSeat'
 
 // Before the first search.
@@ -27,11 +30,16 @@ export function StartSearch() {
   )
 }
 
-// rides undefined = still searching.
-export function SearchResults({ rides }: Readonly<{ rides: Ride[] | undefined }>) {
+type SearchResultsProps = Readonly<{
+  rides: Ride[] | undefined // undefined = still searching
+  selectedId: string | null
+  onSelect: (id: string) => void
+}>
+
+export function SearchResults({ rides, selectedId, onSelect }: SearchResultsProps) {
   if (!rides) {
     return (
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4">
         {Array.from({ length: 4 }, (_, index) => (
           <Skeleton key={index} className="h-48 rounded-xl" />
         ))}
@@ -60,18 +68,27 @@ export function SearchResults({ rides }: Readonly<{ rides: Ride[] | undefined }>
       <p className="text-sm text-muted-foreground">
         {rides.length} {rides.length === 1 ? 'ride' : 'rides'} found, soonest first.
       </p>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4">
         {rides.map((ride) => (
-          <RideResultCard key={ride.id} ride={ride} />
+          <RideResultCard key={ride.id} ride={ride} isSelected={ride.id === selectedId} onSelect={onSelect} />
         ))}
       </div>
     </div>
   )
 }
 
-function RideResultCard({ ride }: Readonly<{ ride: Ride }>) {
+type RideResultCardProps = Readonly<{ ride: Ride; isSelected: boolean; onSelect: (id: string) => void }>
+
+function RideResultCard({ ride, isSelected, onSelect }: RideResultCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Picked on the map: bring the card into view (no scroll when it is already visible).
+  useEffect(() => {
+    if (isSelected) cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [isSelected])
+
   return (
-    <Card>
+    <Card ref={cardRef} className={cn(isSelected && 'ring-2 ring-primary')}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarClock className="size-4 text-muted-foreground" />
@@ -96,7 +113,11 @@ function RideResultCard({ ride }: Readonly<{ ride: Ride }>) {
         </InfoTile>
       </CardContent>
 
-      <CardFooter className="justify-end">
+      <CardFooter className="justify-end gap-2">
+        <Button variant="outline" aria-pressed={isSelected} onClick={() => onSelect(ride.id)}>
+          <MapPin data-icon="inline-start" />
+          {isSelected ? 'Hide route' : 'Show on map'}
+        </Button>
         <BookSeatButton ride={ride} />
       </CardFooter>
     </Card>

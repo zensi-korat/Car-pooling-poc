@@ -20,4 +20,5 @@ export const QUERY_KEYS = {
   },
   vehicleDocument: (vehicleId: string, type: string) => ['vehicles', vehicleId, 'documents', type],
   places: (query: string) => ['places', query],
+  roadRoute: (ends: unknown) => ['road-route', ends],
 } as const
