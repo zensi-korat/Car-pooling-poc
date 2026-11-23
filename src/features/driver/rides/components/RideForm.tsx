@@ -193,7 +193,7 @@ export function RideForm({ vehicles, ride }: RideFormProps) {
 
 export function NoApprovedVehicle() {
   return (
-    <Empty className="max-w-2xl border border-dashed">
+    <Empty className="max-w-2xl rounded-xl border border-dashed bg-card">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <CarFront />
@@ -214,7 +214,7 @@ export function NoApprovedVehicle() {
 
 export function RideNotFound() {
   return (
-    <Empty className="max-w-2xl border border-dashed">
+    <Empty className="max-w-2xl rounded-xl border border-dashed bg-card">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Route />

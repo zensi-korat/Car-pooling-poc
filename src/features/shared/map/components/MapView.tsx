@@ -26,7 +26,7 @@ export function MapView({ className, children }: MapViewProps) {
 
   return (
     // `isolate` keeps Leaflet's high z-indexes inside the map, so it can't cover dropdowns and dialogs.
-    <MapContainer center={INDIA_CENTER} zoom={5} className={cn('isolate rounded-lg border', className)}>
+    <MapContainer center={INDIA_CENTER} zoom={5} className={cn('isolate rounded-xl border', className)}>
       <TileLayer url={TILE_URLS[theme]} attribution={ATTRIBUTION} />
       {children}
     </MapContainer>

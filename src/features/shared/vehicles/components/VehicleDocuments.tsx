@@ -74,7 +74,7 @@ function DocumentPreview({ vehicle, type }: DocumentPreviewProps) {
 
   if (url && image === 'failed') {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-lg border p-8 text-center text-sm text-muted-foreground">
+      <div className="flex flex-col items-center gap-3 rounded-xl border p-8 text-center text-sm text-muted-foreground">
         <FileText className="size-8" aria-hidden />
         <p>This file can't be shown here. PDFs can only be downloaded for now.</p>
         <Button asChild variant="outline">
@@ -100,7 +100,7 @@ function DocumentPreview({ vehicle, type }: DocumentPreviewProps) {
           alt={`${DOCUMENT_NAMES[type]} of ${vehicle.plateNumber}`}
           onLoad={() => setImage('shown')}
           onError={() => setImage('failed')}
-          className={cn('max-h-[70vh] w-full rounded-lg border object-contain', image !== 'shown' && 'hidden')}
+          className={cn('max-h-[70vh] w-full rounded-xl border object-contain', image !== 'shown' && 'hidden')}
         />
       )}
     </>

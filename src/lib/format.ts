@@ -9,6 +9,15 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata',
 })
 
+const timeFormat = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })
+
+const dayFormat = new Intl.DateTimeFormat('en-IN', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'Asia/Kolkata',
+})
+
 const fareFormat = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
@@ -18,6 +27,16 @@ const fareFormat = new Intl.NumberFormat('en-IN', {
 // "2026-11-12T04:00:00.000Z" → "12 Nov 2026, 9:30 am"
 export function formatDateTime(iso: string): string {
   return dateTimeFormat.format(new Date(iso))
+}
+
+// "2026-11-12T04:00:00.000Z" → "9:30 am"
+export function formatTime(iso: string): string {
+  return timeFormat.format(new Date(iso))
+}
+
+// "2026-11-12T04:00:00.000Z" → "Thu, 12 Nov"
+export function formatDay(iso: string): string {
+  return dayFormat.format(new Date(iso))
 }
 
 // The server sends money as text ("1200.00") → "₹1,200"

@@ -1,10 +1,11 @@
-import { CalendarClock, MapPin, SearchX, Ticket, Users } from 'lucide-react'
+import { MapPin, SearchX, Ticket, Users } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
+import { StatusBadge } from '@/components/badges'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { InfoTile, RouteLine } from '@/components/page'
+import { DepartureTime, RouteLine } from '@/components/page'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/constants/routes'
@@ -16,7 +17,7 @@ import { useBookSeat } from '../hooks/useBookSeat'
 // Before the first search.
 export function StartSearch() {
   return (
-    <Empty className="border border-dashed">
+    <Empty className="rounded-xl border border-dashed bg-card">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Ticket />
@@ -41,7 +42,7 @@ export function SearchResults({ rides, selectedId, onSelect }: SearchResultsProp
     return (
       <div className="grid gap-4">
         {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="h-48 rounded-xl" />
+          <Skeleton key={index} className="h-44 rounded-xl" />
         ))}
       </div>
     )
@@ -49,7 +50,7 @@ export function SearchResults({ rides, selectedId, onSelect }: SearchResultsProp
 
   if (rides.length === 0) {
     return (
-      <Empty className="border border-dashed">
+      <Empty className="rounded-xl border border-dashed bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <SearchX />
@@ -88,37 +89,32 @@ function RideResultCard({ ride, isSelected, onSelect }: RideResultCardProps) {
   }, [isSelected])
 
   return (
-    <Card ref={cardRef} className={cn(isSelected && 'ring-2 ring-primary')}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarClock className="size-4 text-muted-foreground" />
-          {formatDateTime(ride.departureTime)}
-        </CardTitle>
-      </CardHeader>
-
+    <Card ref={cardRef} className={cn('rounded-xl', isSelected && 'ring-2 ring-primary')}>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
-          <RouteLine from={ride.originLabel} to={ride.destLabel} />
+          <DepartureTime iso={ride.departureTime} />
           <div className="flex shrink-0 flex-col items-end">
-            <span className="text-xs text-muted-foreground">Total fare</span>
-            <span className="text-lg font-semibold tabular-nums">{formatFare(ride.estimatedCost)}</span>
-            <span className="text-xs text-muted-foreground">split among riders</span>
+            <span className="text-2xl font-extrabold tracking-tight tabular-nums">
+              {formatFare(ride.estimatedCost)}
+            </span>
+            <span className="text-xs text-muted-foreground">total, split among riders</span>
           </div>
         </div>
-
-        <InfoTile Icon={Users} label="Seats">
-          <span className="font-medium">
-            {ride.seatsAvailable} of {ride.totalSeats} free
-          </span>
-        </InfoTile>
+        <RouteLine from={ride.originLabel} to={ride.destLabel} />
       </CardContent>
 
-      <CardFooter className="justify-end gap-2">
-        <Button variant="outline" aria-pressed={isSelected} onClick={() => onSelect(ride.id)}>
-          <MapPin data-icon="inline-start" />
-          {isSelected ? 'Hide route' : 'Show on map'}
-        </Button>
-        <BookSeatButton ride={ride} />
+      <CardFooter className="flex-wrap justify-between gap-3 border-t-0 bg-transparent">
+        <StatusBadge tone="brand">
+          <Users />
+          {ride.seatsAvailable} of {ride.totalSeats} seats free
+        </StatusBadge>
+        <div className="flex gap-2">
+          <Button variant="outline" aria-pressed={isSelected} onClick={() => onSelect(ride.id)}>
+            <MapPin data-icon="inline-start" />
+            {isSelected ? 'Hide route' : 'Show on map'}
+          </Button>
+          <BookSeatButton ride={ride} />
+        </div>
       </CardFooter>
     </Card>
   )

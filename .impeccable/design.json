@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T00:00:00Z",
+  "title": "Design System: Pool",
+  "extensions": {
+    "colorMeta": {
+      "terracotta": { "role": "primary", "displayName": "Terracotta", "canonical": "oklch(0.565 0.141 39.3)", "tonalRamp": ["oklch(0.25 0.06 39)", "oklch(0.35 0.09 39)", "oklch(0.452 0.117 39.1)", "oklch(0.565 0.141 39.3)", "oklch(0.661 0.141 40.4)", "oklch(0.78 0.08 45)", "oklch(0.885 0.04 45)", "oklch(0.955 0.015 45)"] },
+      "road-grey": { "role": "neutral", "displayName": "Road Grey", "canonical": "oklch(0.971 0.003 60)", "tonalRamp": ["oklch(0.17 0.006 40)", "oklch(0.21 0.012 40)", "oklch(0.35 0.01 40)", "oklch(0.5 0.012 40)", "oklch(0.7 0.008 50)", "oklch(0.91 0.006 50)", "oklch(0.955 0.004 60)", "oklch(0.971 0.003 60)"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page titles." },
+      "title": { "displayName": "Trip facts", "purpose": "Departure times and fares on ride cards." },
+      "body": { "displayName": "Body", "purpose": "Descriptions, place names, table cells." },
+      "label": { "displayName": "Label", "purpose": "Captions, hints, badges." }
+    },
+    "shadows": [
+      { "name": "card-lift", "value": "0 1px 2px oklch(0.3 0.03 40 / 6%), 0 4px 14px oklch(0.3 0.03 40 / 7%)", "purpose": "Every card, table and section box." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    { "name": "Primary Button", "kind": "button", "refersTo": "button-primary", "description": "Main action: Search, Book a seat, Post a ride.", "html": "<button class=\"ds-btn-primary\">Book a seat</button>", "css": ".ds-btn-primary { background: var(--primary); color: var(--primary-foreground); border: none; border-radius: 6px; padding: 8px 16px; font: 500 14px 'Figtree Variable', sans-serif; transition: background .15s; } .ds-btn-primary:hover { background: color-mix(in oklab, var(--primary) 80%, transparent); } .ds-btn-primary:focus-visible { outline: 3px solid color-mix(in oklab, var(--ring) 50%, transparent); }" },
+    { "name": "Outline Button", "kind": "button", "refersTo": "button-outline", "description": "Secondary action: Show on map, Edit.", "html": "<button class=\"ds-btn-outline\">Show on map</button>", "css": ".ds-btn-outline { background: var(--background); color: var(--foreground); border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; font: 500 14px 'Figtree Variable', sans-serif; } .ds-btn-outline:hover { background: var(--muted); } .ds-btn-outline:focus-visible { outline: 3px solid color-mix(in oklab, var(--ring) 50%, transparent); }" },
+    { "name": "Seats Pill", "kind": "chip", "refersTo": "chip-brand", "description": "Free seats on a ride.", "html": "<span class=\"ds-chip\">2 of 3 seats free</span>", "css": ".ds-chip { display: inline-flex; gap: 4px; background: var(--secondary); color: var(--secondary-foreground); border-radius: 4px; padding: 2px 8px; font: 500 12px 'Figtree Variable', sans-serif; }" },
+    { "name": "Ride Card", "kind": "card", "refersTo": "card", "description": "Signature card: big time and fare, route, seats, actions.", "html": "<div class=\"ds-card\"><div class=\"ds-row\"><div><div class=\"ds-big\">9:30 am</div><div class=\"ds-sub\">Thu, 12 Nov</div></div><div style=\"text-align:right\"><div class=\"ds-big\">₹600</div><div class=\"ds-sub\">total, split among riders</div></div></div><div class=\"ds-route\">Satellite → Alkapuri</div></div>", "css": ".ds-card { background: var(--card); color: var(--card-foreground); border-radius: 8px; padding: 16px; box-shadow: 0 1px 2px oklch(0.3 0.03 40 / 6%), 0 4px 14px oklch(0.3 0.03 40 / 7%); font-family: 'Figtree Variable', sans-serif; display: grid; gap: 16px; } .ds-row { display: flex; justify-content: space-between; } .ds-big { font-size: 24px; font-weight: 800; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; } .ds-sub { font-size: 12px; color: var(--muted-foreground); } .ds-route { font-weight: 500; }" },
+    { "name": "Text Input", "kind": "input", "description": "Form field with hairline border.", "html": "<input class=\"ds-input\" placeholder=\"Where do you start?\">", "css": ".ds-input { border: 1px solid var(--input); border-radius: 6px; padding: 8px 12px; background: transparent; color: var(--foreground); caret-color: var(--primary); font: 400 14px 'Figtree Variable', sans-serif; } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }" },
+    { "name": "Active Nav Item", "kind": "nav", "refersTo": "nav-item-active", "description": "Current page in the sidebar.", "html": "<a class=\"ds-nav\">Find a Ride</a>", "css": ".ds-nav { display: flex; align-items: center; height: 40px; padding: 0 12px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground); font: 600 14px 'Figtree Variable', sans-serif; }" }
+  ],
+  "narrative": {
+    "northStar": "The Shared Road",
+    "overview": "Pool is built around the trip, not the app. Every screen answers the same questions a rider or driver asks before leaving: when does it go, from where to where, how many seats are left, and what does it cost. Those facts are set large and bold; everything else steps back. One warm terracotta carries the brand, the way a single brand colour carries Rapido or Zomato, so the interface feels like a friendly consumer app rather than an admin template.",
+    "keyCharacteristics": ["One brand colour (terracotta) for actions, selection, active navigation and brand tints.", "Trip facts (departure time, fare) in extra-bold, tabular figures.", "White rounded cards on a soft grey ground, separated by shadow instead of borders.", "Figtree throughout, from page titles to labels.", "Not themed: no tickets, signs or codes used as decoration."],
+    "rules": [
+      { "name": "The One Colour Rule", "body": "Terracotta is the only brand hue. Status colours appear only inside status badges, where they carry meaning.", "section": "colors" },
+      { "name": "The Readable Terracotta Rule", "body": "Light theme puts white text on terracotta; dark theme puts dark text on bright terracotta. Never lighten terracotta while keeping white text on it.", "section": "colors" },
+      { "name": "The Trip Facts Rule", "body": "Departure time and fare are always the largest, boldest text on a ride card, in tabular figures.", "section": "typography" },
+      { "name": "The No Box-in-Box Rule", "body": "A card never sits inside another card, and card footers have no grey strip or divider.", "section": "elevation" }
+    ],
+    "dos": ["Do use terracotta only for actions, selection, active navigation and brand tints.", "Do set departure times and fares in extra-bold tabular figures (DepartureTime, text-2xl font-extrabold).", "Do lift cards with the card-lift shadow on the road-grey ground.", "Do keep every new colour inside the theme tokens in src/index.css and every badge in badges.tsx."],
+    "donts": ["Don't add decorative themes (tickets, road signs, codes, dot patterns) to working screens.", "Don't put grey footer strips, divider lines or nested cards inside cards.", "Don't use heavy gradients, glow or animation everywhere; the user rejected \"too flashy\".", "Don't put white text on a lighter terracotta than terracotta.", "Don't add a small label above a heading; the heading carries itself."]
+  }
+}

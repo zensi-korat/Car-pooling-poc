@@ -7,7 +7,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 export function PageError({ error, resetErrorBoundary }: Readonly<FallbackProps>) {
   return (
     <div className="p-6">
-      <Empty className="border border-dashed">
+      <Empty className="rounded-xl border border-dashed bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <TriangleAlert />

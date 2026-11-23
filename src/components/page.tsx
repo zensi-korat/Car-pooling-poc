@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatDay, formatTime } from '@/lib/format'
 import { PAGE_SIZES } from '@/lib/pagination'
 
 type PageHeaderProps = Readonly<{
@@ -15,9 +16,9 @@ type PageHeaderProps = Readonly<{
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 border-b px-6 py-6">
+    <div className="flex flex-wrap items-end justify-between gap-4 px-6 pt-8">
       <div className="min-w-0">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       {children}
@@ -34,9 +35,9 @@ type SectionCardProps = Readonly<{
 
 export function SectionCard({ title, Icon, aside, children }: SectionCardProps) {
   return (
-    <section className="overflow-hidden rounded-xl border bg-card text-card-foreground">
+    <section className="overflow-hidden rounded-xl bg-card text-card-foreground shadow-sm ring-1 ring-foreground/5">
       <div className="flex items-center gap-3 border-b bg-muted/50 px-5 py-3">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <div className="flex size-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
           <Icon className="size-4" />
         </div>
         <h2 className="font-semibold">{title}</h2>
@@ -111,7 +112,7 @@ export function ListTable<T extends { id: string }>({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
+    <div className="overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-foreground/5">
       <Table aria-busy={isUpdating}>
         <TableHeader className="bg-muted/50">
           <TableRow>
@@ -202,6 +203,16 @@ export function TablePagination({
   )
 }
 
+// A ride's departure: the time large, the day small under it.
+export function DepartureTime({ iso }: Readonly<{ iso: string }>) {
+  return (
+    <span className="flex flex-col">
+      <span className="text-2xl font-extrabold tracking-tight tabular-nums">{formatTime(iso)}</span>
+      <span className="text-sm font-normal text-muted-foreground">{formatDay(iso)}</span>
+    </span>
+  )
+}
+
 // Two dots joined by a line: hollow = start, filled = destination.
 export function RouteLine({ from, to }: Readonly<{ from: string; to: string }>) {
   return (
@@ -231,7 +242,7 @@ export function InfoTile({
   children,
 }: Readonly<{ Icon: LucideIcon; label: string; children: ReactNode }>) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-lg bg-muted/50 p-3">
+    <div className="flex min-w-0 flex-col gap-1 rounded-xl bg-muted p-3">
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Icon className="size-3.5" />
         {label}

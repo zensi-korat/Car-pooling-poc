@@ -82,7 +82,7 @@ function BookingRow({ booking, canCancel }: Readonly<{ booking: RideBooking; can
   const phone = booking.riderContact?.phone
 
   return (
-    <div className={cn('flex items-center gap-3 rounded-lg border p-3', cancelled && 'bg-muted/50')}>
+    <div className={cn('flex items-center gap-3 rounded-xl border p-3', cancelled && 'bg-muted/50')}>
       <Avatar>
         <AvatarFallback>{initials(booking.riderName)}</AvatarFallback>
       </Avatar>

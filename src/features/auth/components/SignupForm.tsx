@@ -54,7 +54,7 @@ export function SignupForm() {
                 return (
                   <label
                     key={role}
-                    className="flex cursor-pointer flex-col gap-1 rounded-lg border p-3 text-sm transition-colors hover:bg-muted/50 has-checked:border-primary has-checked:bg-muted has-focus-visible:ring-3 has-focus-visible:ring-ring/50 has-disabled:cursor-not-allowed has-disabled:opacity-50"
+                    className="flex cursor-pointer flex-col gap-1 rounded-xl border p-3 text-sm transition-colors hover:bg-accent has-checked:border-primary has-checked:bg-secondary has-focus-visible:ring-3 has-focus-visible:ring-ring/50 has-disabled:cursor-not-allowed has-disabled:opacity-50"
                   >
                     <input
                       type="radio"

@@ -80,7 +80,7 @@ export function DashboardLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="min-w-0">
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger />
         </header>
         <div className="flex-1">
@@ -102,15 +102,15 @@ function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-16 justify-center border-b">
+      <SidebarHeader className="h-16 justify-center">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip={env.appName}>
               <Link to={ROUTES.home}>
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                   <CarFront className="size-4" />
                 </div>
-                <span className="text-base font-semibold tracking-tight">{env.appName}</span>
+                <span className="text-lg font-extrabold tracking-tight">{env.appName}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -127,7 +127,7 @@ function AppSidebar() {
                     asChild
                     isActive={pathname === to}
                     tooltip={label}
-                    className="h-9 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                    className="h-10 rounded-xl data-[active=true]:bg-primary data-[active=true]:font-semibold data-[active=true]:text-primary-foreground"
                   >
                     <Link to={to} onClick={() => isMobile && setOpenMobile(false)}>
                       <Icon />

@@ -20,7 +20,7 @@ export function AuthLayout({ title, description, footer, children }: AuthLayoutP
         <main className="flex flex-1 items-center justify-center px-6 pb-16">
           <div className="flex w-full max-w-sm flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
               <p className="text-muted-foreground">{description}</p>
             </div>
 
@@ -38,30 +38,28 @@ export function AuthLayout({ title, description, footer, children }: AuthLayoutP
 
 function AuthShowcase() {
   return (
-    <aside className="relative hidden flex-col justify-center gap-12 overflow-hidden border-l bg-muted p-12 lg:flex">
+    <aside className="relative hidden flex-col justify-center gap-12 overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[20px_20px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+        className="absolute inset-0 bg-[radial-gradient(var(--color-primary-foreground)_1px,transparent_1px)] bg-size-[20px_20px] opacity-20 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
       />
 
       <RoutePreview />
 
       <div className="relative flex max-w-md flex-col gap-3">
-        <h2 className="text-3xl font-semibold tracking-tight text-balance">Going the same way? Share the ride.</h2>
-        <p className="text-muted-foreground">
-          {env.appName} connects drivers who have empty seats with riders heading in the same direction.
-        </p>
+        <h2 className="text-3xl font-extrabold tracking-tight text-balance">Going the same way? Share the ride.</h2>
+        <p>{env.appName} connects drivers who have empty seats with riders heading in the same direction.</p>
       </div>
 
       <ul className="relative flex flex-col gap-5">
         {FEATURES.map(({ title, description, Icon }) => (
           <li key={title} className="flex items-start gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background shadow-sm">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/15">
               <Icon className="size-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-medium">{title}</span>
-              <span className="text-sm text-muted-foreground">{description}</span>
+              <span className="font-semibold">{title}</span>
+              <span className="text-sm">{description}</span>
             </div>
           </li>
         ))}
@@ -73,7 +71,10 @@ function AuthShowcase() {
 // A picture of a ride, drawn like the real map: hollow start dot, road line, filled end dot, fare bubble.
 function RoutePreview() {
   return (
-    <div aria-hidden className="relative flex max-w-md flex-col gap-4 rounded-xl border bg-background p-6 shadow-sm">
+    <div
+      aria-hidden
+      className="relative flex max-w-md flex-col gap-4 rounded-xl bg-card p-6 text-card-foreground shadow-xl"
+    >
       <div className="relative aspect-[5/3]">
         <svg viewBox="0 0 400 240" fill="none" className="absolute inset-0 size-full">
           <path
